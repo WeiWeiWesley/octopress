@@ -1,6 +1,6 @@
 ---
 layout: post
-title: ""我想試發一篇文章""
+title: "I want to add a new post"
 date: 2019-05-26 16:10:23 +0800
 comments: true
 categories: 

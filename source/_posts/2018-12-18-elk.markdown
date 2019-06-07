@@ -1,0 +1,44 @@
+---
+layout: post
+title: "30Days ELK - Day3  logstash 輸入配置"
+date: 2016-12-18 19:52:07 +0800
+comments: true
+categories: 
+---
+
+Day3 - logstash 輸入配置
+===
+
+首先 logstash 是 E.L.K 最先觸碰到你想要管理 log 部分，你可以把他想成一個介接層也是首次接觸到 log 或資料的地方，在這裡你可以選擇你的輸入來源像是直接讀 log 檔，抑或是當你想直接接受多台機器的 log 時你可以使用 tcp 作為接口。其次當多個來源的資料想分別處理成不同資訊時，在 logstash 提供的 input 可以協助我們預先做出簡單的類別判斷，以利後續 filter 分別使用不同的規則進行切割，最後於 output 選擇要輸出的方式與位置。
+
+logstash 的配置非常的簡潔明瞭，主要可分成三個部分 : input, filter, output
+你可以看到預設的 docker-elk/logstash/config/logstash.conf 長得像
+
+```toml
+input {
+    tcp {
+        port => 5000
+    }
+}
+
+## Add your filters / logstash plugins configuration here
+
+output {
+    elasticsearch {
+        hosts => "elasticsearch:9200"
+    }
+```
+
+在這份 logstash 預設的設定檔中並沒有 filter 的部分，因此我們送到 port 5000 的內容會直接地被送至 elasticsearch 被儲存。我們可以簡單編輯一個 test.txt 裡面有著內容 "hello world" 來測試結果。
+
+>hello world
+
+```bash
+$ nc 127.0.0.1 5000 < test.txt
+```
+
+你可以直接到 http://127.0.0.1:5601/ 觀察結果
+
+{% img /images/ithome/day3-1.png "day3-1.png" %}
+
+沒錯你剛剛已經完成了把想要的純文字檔案透過 logstash 儲存至 elasticsearch 並且以 kibana 呈現的流程，是不是非常的容易呢，基本上至此我們只需要持續調整 logstash 的設定檔便可以完成許多想要關注的事情囉。

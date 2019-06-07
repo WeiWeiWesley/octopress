@@ -1,0 +1,181 @@
+---
+layout: post
+title: "30Days ELK - Day8 Elasticsearch CRUD"
+date: 2016-12-23 23:10:12 +0800
+comments: true
+categories: 
+---
+
+Day8 - Elasticsearch CRUD
+===
+
+之前提過 elasticsearh 是個擁有全 RESTful API 操作的分散式資料庫，於且向大家介紹一下其基本操作的方法。雖然不見得在使用 E.L.K 會用到，畢竟解析由 logstash 完成了，一般存取也可以由 kibana 完成，但如果想針對單筆紀錄作微調或測試你還是會用到以 curl CRUD 操作的。
+
+## CREATE
+
+新增一筆紀錄
+
+```bash
+$ curl -XPOST http://127.0.0.1:9200/logstash-2016.12.23/testPOST -d  '{
+  "userNme" : "weiwei",
+  "@timestamp" : "2016-12-23T02:50:29.070Z",
+  "message" : "This is a meaage for testing POST"
+}'
+```
+
+回傳結果為
+
+```json
+{"_index":"logstash-2016.12.23","_type":"testPOST","_id":"AVkp1r3mBRKdREkz5nY3","_version":1,"result":"created","_shards":{"total":2,"successful":1,"failed":0},"created":true}
+```
+
+還記得之前說過的 index, type 的概念嗎? 我們現在再來檢視一下剛剛送出的 POST URL :
+
+- "http://127.0.0.1:9200/ " : 這是你的機器IP位址，也就是 server 位址
+- "logstash-2016.12.23/ " : 這是 index，也就是 database
+- "testPOST" : 這是 type，也就是 table 的部分
+
+也就是剛剛的 POST 可以簡單看成我們在 TABLE testPOST 新增了 userNme, @timestamp, message 的資料。
+這部分可以用回傳的內容作驗證 "_index":"logstash-2016.12.23","_type":"testPOST" ，而其中"_id":"AVkp1r3mBRKdREkz5nY3"則是我們這次送出紀錄的唯一 Id，我們之後可以利用這個 Id 做更新或刪除的動作。
+
+## READ
+
+取得剛剛我們送出的紀錄
+
+```bash
+$ curl -XGET http://127.0.0.1:9200/logstash-2016.12.23/testPOST/AVkp1r3mBRKdREkz5nY3?pretty
+```
+
+回傳結果為
+
+```json
+{
+  "_index" : "logstash-2016.12.23",
+  "_type" : "testPOST",
+  "_id" : "AVkp1r3mBRKdREkz5nY3",
+  "_version" : 1,
+  "found" : true,
+  "_source" : {
+    "userNme" : "weiwei",
+    "@timestamp" : "2016-12-23T02:50:29.070Z",
+    "message" : "This is a meaage for testing POST"
+  }
+}
+```
+
+以上這便是以 "_id" : "AVkp1r3mBRKdREkz5nY3" 取回來的單筆紀錄資訊。若是你想獲得特定 type 下的所有紀錄的話你可以:
+
+```bash
+$ curl -XGET http://127.0.0.1:9200/logstash-2016.12.23/testPOST/_search?pretty
+```
+
+回傳結果為
+
+```json
+{
+  "took" : 2,
+  "timed_out" : false,
+  "_shards" : {
+    "total" : 5,
+    "successful" : 5,
+    "failed" : 0
+  },
+  "hits" : {
+    "total" : 3,
+    "max_score" : 1.0,
+    "hits" : [
+      {
+        "_index" : "logstash-2016.12.23",
+        "_type" : "testPOST",
+        "_id" : "AVkp1r3mBRKdREkz5nY3",
+        "_score" : 1.0,
+        "_source" : {
+          "userNme" : "weiwei",
+          "@timestamp" : "2016-12-23T02:50:29.070Z",
+          "message" : "This is a meaage for testing POST"
+        }
+      },
+      {
+        "_index" : "logstash-2016.12.23",
+        "_type" : "testPOST",
+        "_id" : "AVkqVxt2BRKdREkz5nY4",
+        "_score" : 1.0,
+        "_source" : {
+          "userNme" : "weiwei",
+          "@timestamp" : "2016-12-23T02:50:29.070Z",
+          "message" : "This is a meaage for testing POST"
+        }
+      },
+      {
+        "_index" : "logstash-2016.12.23",
+        "_type" : "testPOST",
+        "_id" : "AVkqV37DBRKdREkz5nY5",
+        "_score" : 1.0,
+        "_source" : {
+          "userNme" : "alice",
+          "@timestamp" : "2016-12-23T03:50:29.070Z",
+          "message" : "This is a meaage for testing POST"
+        }
+      }
+    ]
+  }
+}
+```
+
+貼心小提醒 : 在GET後帶上 ?pretty 參數可以讓你的輸出更人性化哦
+
+## UPDATE
+
+```bash
+$ curl -XPOST http://127.0.0.1:9200/logstash-2016.12.23/testPOST/AVkqVxt2BRKdREkz5nY4/_update  -d '{
+"doc" : {
+  "userName" : "red queen"
+  }
+}'
+```
+
+回傳結果為
+
+```json
+{"_index":"logstash-2016.12.23","_type":"testPOST","_id":"AVkqVxt2BRKdREkz5nY4","_version":2,"result":"updated","_shards":{"total":2,"successful":2,"failed":0}}
+```
+
+雖然看起來跟新增差不多只是多加一層 /_update ，但要注意的地方有兩點:
+
+- "doc" : 便為 documents 的縮寫，所以我們修改的內容為 documents 下的 userName 欄位
+- "_version" : 可以看到 _version 的值為 2 比我們首次 create 的時候增加1，這就是"_id":"AVkqVxt2BRKdREkz5nY4" 被異動的次數
+
+我們可以來看一下資料是否真的被修改了:
+
+```bash
+$ curl -XGET http://127.0.0.1:9200/logstash-2016.12.23/testPOST/AVkqc_eJBRKdREkz5nZA?pretty
+
+{
+  "_index" : "logstash-2016.12.23",
+  "_type" : "testPOST",
+  "_id" : "AVkqVxt2BRKdREkz5nY4",
+  "_version" : 2,
+  "found" : true,
+  "_source" : {
+    "userName" : "red queen",
+    "@timestamp" : "2016-12-23T02:50:29.070Z",
+    "message" : "This is a meaage for testing POST"
+  }
+}
+
+```
+
+## DELETE
+
+其實剛剛介紹的新增讀取修改在我們平常使用 E.L.K 時都不常用到，我們比較常用到的其實是 delete 功能，例如刪掉一整個 index。
+
+```bash
+$ curl -XDELETE http://127.0.0.1:9200/logstash-2016.12.23
+```
+
+如此一來位於 index 下的所有紀錄都被刪除囉，你也可以透過通用符號來刪除多筆 index 如:
+
+```bash
+$ curl -XDELETE http://127.0.0.1:9200/logstash-2016.12.*
+```
+

@@ -1,0 +1,93 @@
+---
+layout: post
+title: "30Days ELK - Day5  便利的 logstash plugin (filter)"
+date: 2016-12-20 20:21:00 +0800
+comments: true
+categories: 
+---
+
+Day5 - 便利的 logstash plugin (filter)
+===
+
+Filter plugins 可以說是整個 logstash 最核心的部分，多數你想要過濾的資料內容都可以仰賴其進行。而 filter plugins 的選擇與配置多數相關於一開始輸入的資料類型，舉例來說你的資料可能含有 geographical location 那你的 filter plugins 就可以加上 geoip ，來幫助你切割出經緯度、地區、國家、時區等資訊。以下簡單介紹一下幾個實用的 filter plugins 使用方式。
+
+## grok
+
+```toml
+filter {
+    grok {
+       match => {
+            "message" => "\[(?<date>.+?)\] %{LOGLEVEL:level}, ClientIP：%{IPV4:client_ip}, SeverIP：%{IPV4:server_ip}, %{GREEDYDATA:message}"
+       }
+     }
+}
+```
+
+testLog
+>[2016-12-10 23:59:59.634] ERROR, ClientIP：123.128.251.73, SeverIP：172.16.152.104, testmessage[測試訊息]#逃避雖可恥但有用#新垣結衣我老婆
+
+試作上面的例子你可以切割出的內容有日期(date), level, client_ip, server_ip, messag 共五個資訊欄位，輸出如下 :
+
+```bash
+main_logstash    | {
+main_logstash    |           "date" => "2016-12-10 23:59:59.634",
+main_logstash    |     "@timestamp" => 2016-12-20T07:52:18.434Z,
+main_logstash    |           "port" => 59257,
+main_logstash    |          "level" => "ERROR",
+main_logstash    |       "@version" => "1",
+main_logstash    |           "host" => "172.18.0.1",
+main_logstash    |      "server_ip" => "172.16.152.104",
+main_logstash    |      "client_ip" => "123.128.251.73",
+main_logstash    |        "message" => [
+main_logstash    |         [0] "[2016-12-10 23:59:59.634] ERROR, ClientIP：122.118.251.72, SeverIP：173.14.162.104, testmessage[測試訊息]#逃避雖可恥但有用#新垣結衣我老婆",
+main_logstash    |         [1] "testmessage[測試訊息]#逃避雖可恥但有用#新垣結衣我老婆"
+main_logstash    |     ],
+main_logstash    |           "type" => "testFilter",
+main_logstash    |           "tags" => []
+main_logstash    | }
+```
+
+首先你要知道的是所有你要切割的資訊都在 "messag" 這個屬性內也就是我們在 testLog 裡的完整內容，而 grok 這個插件提供了我們強大的字串切割能力，包含兩個部分正規表達式與 grok 表達語法。上面例子裡便使用了正規表達式來過濾日期(date)，grok 表達語法來分析剩下的部分。雖然使用正規表達式較為彈性，但本次想跟大家介紹的部分著重在 grok 表達語法的部分，原因在於其簡單易懂的格式方便我們快速開發，如果真的有需求再用正規表達式吧!
+
+grok表達語法的基本組成 %{屬性:自訂切割後屬性名稱}，從上面的例子 %{IPV4:client_ip} 就可以看的出來字串 '123.128.251.73' 符合 IPV4 屬性，成功過濾出 "client_ip" => "123.128.251.73" 新屬性欄位，此外在使用 grok 進行資料的過濾時，可善用文件內含有的分隔符號如逗號、空白、分號等來協助你漂亮的分出段落。在此強烈推薦一個實用的 grok 檢驗工具 grokdebug 給大家，有了它我們可以快速地完成 grok表達語法的組成並立即看到過濾結果。
+
+最後提供這次測試的完整 logstash.conf 內容給大家
+
+docker-elk/logstash/config/logstash.conf
+
+```toml
+input {
+        tcp {
+                port => 5000
+                type => "testFilter"
+        }
+}
+
+filter {
+        grok {
+         match => {
+              "message" => "\[(?<date>.+?)\] %{LOGLEVEL:level}, ClientIP：%{IPV4:client_ip}, SeverIP：%{IPV4:server_ip}, %{GREEDYDATA:message}"
+         }
+       }
+}
+
+output {
+        stdout {
+                codec => rubydebug
+        }
+}
+```
+
+>提醒：ELK docker 啟動時不以背景方式啟動，這麼做是方便我們在建置時方便 debug 的做法
+You can do the following
+
+```bash
+$ sudo docker-compse -f docker-compose.yml up
+```
+
+.  
+.  
+.  
+
+什麼？你說那個其他實用的 filter plugins 介紹呢？  
+今天累囉，明天再見。 <img src="https://ithelp.ithome.com.tw/images/emoticon/emoticon29.gif" alt="Italian Trulli">

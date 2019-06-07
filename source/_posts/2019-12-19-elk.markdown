@@ -1,0 +1,75 @@
+---
+layout: post
+title: "30Days ELK - Day4  便利的 logstash plugin (input)"
+date: 2016-12-19 17:33:23 +0800
+comments: true
+categories: 
+---
+
+Day4 - 便利的 logstash plugin (input)
+===
+
+我們在昨天的內容分享了基本的 logstash 使用方式，今天要介紹的則是 logstash 的 input plugins 。其實 logstash 的運作除了基於其 input, filter, ouput 的架構外，在這三層架構中使用的 plugins 才是讓整個 logstash 具有資料切割與過濾能力的核心關鍵，input plugins 提供了我們獲取各式不同資料來源的方式，以下分別介紹幾個常用的 input plugin。
+
+## tcp
+
+首先說明一下昨日在預設的 docker-elk/logstash/config/logstash.conf 所使用的 input plugin 便是 tcp，tcp 這個 input plugin 可以接收來自於 TCP socket 的資訊，雖說昨日我們因測試環境的關係將訊息傳送至 127.0.0.1，但其實你可以試試使用不同的機器將訊息傳送至你裝有 logsash 的機器 ip 上，如此一來我們便可以多台機器做為資料來源囉。
+
+```toml
+input {
+    tcp {
+        port => 9527
+        type => apache
+    }
+
+    tcp {
+        port => 9453
+        type => dev_log
+    }
+}  
+```
+
+你可以善用不同接收端口的特性來分類你的資料類型，透過 type 屬性的賦予有利於我們之後在 filter 進行資料的切割與過濾。
+
+## log4j
+
+如果你是 java 環境的開發者大概對這個套件不陌生，而且在這裡很友善的可以直接透過 input plugin 幫你切割出幾個重要的資訊，包含了：timestamp, path, priority, logger_name, thread, class, file, method
+
+```toml
+input {
+    log4j {
+        type => "log4j"
+        port => 3690
+    }
+}
+```
+
+*注意你的配置文件可能需要設置對應的接收端口如：*
+*log4j.appender.logstash.Port=3690*
+
+## file
+
+另一個常用的 input plugin ，常用來觀察已寫成純文字檔的資料來源，預設持續觀察指定檔案如有異動則觸發 logstash 進行基料擷取。
+
+```toml
+input {
+    file {
+        path => ["/var/log/*.log", "/var/log/errorLog"]
+        type => "system"
+    }
+}
+```
+
+如果你是初次啟用想要從頭取得全部 log 內容呢？
+直接添加屬性 start_position => "beginning" 即可。
+
+```toml
+input {
+    file {
+        path => ["/var/log/*.log", "/var/log/errorLog"]
+        type => "system"
+        start_position => "beginning"
+    }
+}
+``` 
+

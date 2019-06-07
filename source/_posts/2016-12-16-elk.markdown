@@ -1,0 +1,33 @@
+---
+layout: post
+title: "30Days ELK - Day1 Why E.L.K"
+date: 2016-12-16 14:52:07 +0800
+comments: true
+categories: 
+---
+Day1 - Why E.L.K
+===
+
+初次接觸 E.L.K 希望藉由記錄下學習過程，幫助自己與初次接觸 E.L.K的新手了解其安裝的過程、使用的方法與可能會遇到的困難。首先我們先了解一下 E.L.K 是什麼?
+
+## What is E.L.K
+
+第一件需要了解的是 E.L.K 並非一套軟體，而是由 3個不同的 open-source 軟體所構成的套件，分別包含 :
+>
+- Logstash
+- Elasticsearch
+- Kibana
+
+套件的整運體運作流程為，經由 Logstash 收集與處理傳入 server 端的 log紀錄，再將其推送至 Elasticsearch 進行儲存，最後透過 Kibana 進行資料視覺化的呈現。透過三個軟體的運作滿足了我們對 log日誌分析的需求。
+
+{% img /images/ithome/day1-1.png "day1-1.png" %}
+
+## Why E.L.K
+
+相對於 Splunk's enterprise 提供更多樣化的功能與呈現方式 E.L.K 或許略顯不足，但考量到只需乾淨報表與直覺的視覺化呈現圖示來說，身為開源軟體的 E.L.K 實在是一項非常優秀的選擇，更不用說有了 Netflix, LinkedIn 等知名企業的採用，越來越多的中小型企業也相自身的 log 分析寄託在 E.L.K 身上。
+
+{% img /images/ithome/day1-2.png "day1-2.png" %}
+
+## How E.L.K implemented
+
+本次建置將以 docker 作為容器，讓我們不需要關心實體平台的差異，專心致力於建置我們的 E.L.K 設定部屬。

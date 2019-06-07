@@ -1,0 +1,36 @@
+---
+layout: post
+title: "30Days ELK - Day7 Elasticsearch"
+date: 2016-12-22 19:50:02 +0800
+comments: true
+categories: 
+---
+
+Day7 - Elasticsearch
+===
+
+Elasticsearch 是我們之後再 kibana 之所以可以快速的呼叫與搜尋的關鍵，我們來簡單暸解一下 elasticsearch 的特性與他在 E.L.K 中扮演的角色。
+
+## Elasticsearch
+- 分散式叢集架構
+- JAVA environment
+- 全文搜索功能 (JSON)
+- RESTful API
+
+從上面的幾項特點不難看出為什麼 elasticsearch 受歡迎的原因，首先 java 環境提供了他跨平台的能力，更好的是 RESTful API ，他代表的是基於其良好的架構設計使得我們所有的操作都可以透過http GET/POST/PUT/DELETE 來完成。
+
+還記得先前這張示意圖嗎？
+
+{% img /images/ithome/day7-1.png "day7-1.png" %}
+
+我們在這裡還是可以簡單的把它當成“分散式叢集架構的非關聯式資料庫”這樣就簡單多了，沒錯就是資料庫。很多人會這麼看他 :
+
+- node : server
+- index : database
+- type : table
+- fields : columns
+- documents : rows
+
+先前在 logstash 過濾完都資料都可以送至 elasticsearch 做儲存，並利用其叢集多節點特性我們可以彈性的增加結點到不同機器上，確保單一節點壞掉的時候整個服務還是可以運作的，有了以上對 elasticsearch 的粗略概念有助於我們日後在對整體 ELK 效能優化的時候有更多掌握。
+
+好吧今天打球太累了啾打到這兒{% img /images/ithome/emoticon28.gif "emoticon28.gif" %}

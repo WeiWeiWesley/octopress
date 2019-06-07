@@ -1,0 +1,184 @@
+---
+layout: post
+title: "30Days ELK - Day6 便利的 logstsh plugin (filter - 2)"
+date: 2016-12-21 14:12:52 +0800
+comments: true
+categories: 
+---
+
+Day6 - 便利的 logstsh plugin (filter - 2)
+===
+
+今天繼續來看一下有什麼實用的 filter plugins 可以協助我們把資訊從原始資料切割出來。
+
+## json
+
+> {"info":"test_json","more_inf":["A json encode format"]}
+
+```json
+input {
+        tcp {
+                port => 5000
+                type => testFilter
+        }
+}
+
+filter {
+        json {
+                source => "message"
+                target => "jsoncontent"
+        }
+}
+
+
+output {
+        stdout {
+                codec => "rubydebug"
+        }
+
+        elasticsearch {
+                hosts => "elasticsearch:9200"
+        }
+}
+```
+
+```bash
+main_logstash    | {
+main_logstash    |      "@timestamp" => 2016-12-21T08:46:56.119Z,
+main_logstash    |            "port" => 60214,
+main_logstash    |     "jsoncontent" => {
+main_logstash    |             "info" => "test_json",
+main_logstash    |         "more_inf" => [
+main_logstash    |             [0] "A json encode format"
+main_logstash    |         ]
+main_logstash    |     },
+main_logstash    |        "@version" => "1",
+main_logstash    |            "host" => "172.18.0.1",
+main_logstash    |         "message" => "{\"info\":\"test_json\",\"more_inf\":[\"A json encode format\"]}",
+main_logstash    |            "type" => "testFilter",
+main_logstash    |            "tags" => []
+main_logstash    | }
+```
+
+可以看到原本 json 格式的內容被過濾到指定的 jsoncontent 屬性內，並且依照 jsondecode 後的特性保值原有資料結構，這對常用 json 編碼的使用者來說真的是非常方便呢。
+
+假設你是用上面的設定檔啟動 ＥＬＫ 的話，因為在 output 有設定輸出至 elasticsearch 的關係你還可以直接至 kibana 觀察結果。
+
+{% img /images/ithome/day6-1.png "day6-1.png" %}
+
+## mutate
+
+這是另一個除了 grok 之外我們無法不用到的 filter plugin，他除了提供字串切割的功能外還多了型態轉換與基本計算能力。
+
+> 2016-11-11 11:11:11,ERROR,Alert Connection Timeout,300ms
+
+```json
+filter {
+    mutate {
+          convert => ["execuate_time", "float"]
+    }
+}
+```
+
+你可以將以先前用 grok 切割出來的屬性內容再拿出來透過 mutate convert 轉換其型態。
+
+```json
+filter {
+  mutate {
+      split => ["message", ","]
+  }
+}
+```
+
+或者你的 log 內容全由特定符號作為資訊的切割你也可以使用 mutate split 來切分內容。
+
+```json
+filter {
+  mutate {
+      gsub => ["message", " ", "_"]
+  }
+}
+```
+
+你可以取代特定字串透過 gsub ，這十分便利於我們想自訂單位或過濾特殊符號的時候。
+
+```json
+filter {
+  mutate {
+      rename => ["execuate_time", "system_exec_time"]
+  }
+}
+```
+
+最後你也可以重新命名任一你先前已經切割出來的屬性。
+
+## geoip
+
+geoip 是一個協助我們做資料視覺化的好幫手，他可以解析 ipv4 或 ipv6 提供我們 ip 所在的位置與其相關資訊。
+
+```json
+input {
+        tcp {
+                port => 5000
+                type => testFilter
+        }
+}
+
+filter {
+        grok {
+                match => {"message" => "ip_address %{IPV4:ip}"}
+        }
+        geoip {
+                source => "ip"
+        }
+}
+
+output {
+        stdout {
+                codec => "rubydebug"
+        }
+
+        elasticsearch {
+                hosts => "elasticsearch:9200"
+        }
+}
+```
+
+```bash
+logstash_1       | {
+logstash_1       |     "@timestamp" => 2016-12-21T14:43:39.700Z,
+logstash_1       |          "geoip" => {
+logstash_1       |              "city_name" => "Hanoi",
+logstash_1       |               "timezone" => "Asia/Ho_Chi_Minh",
+logstash_1       |                     "ip" => "123.30.238.16",
+logstash_1       |               "latitude" => 21.0333,
+logstash_1       |          "country_code2" => "VN",
+logstash_1       |           "country_name" => "Vietnam",
+logstash_1       |         "continent_code" => "AS",
+logstash_1       |          "country_code3" => "VN",
+logstash_1       |            "region_name" => "Thanh Pho Ha Noi",
+logstash_1       |               "location" => [
+logstash_1       |             [0] 105.85,
+logstash_1       |             [1] 21.0333
+logstash_1       |         ],
+logstash_1       |              "longitude" => 105.85,
+logstash_1       |            "region_code" => "64"
+logstash_1       |     },
+logstash_1       |           "port" => 56768,
+logstash_1       |             "ip" => "123.30.238.16",
+logstash_1       |       "@version" => "1",
+logstash_1       |           "host" => "172.18.0.1",
+logstash_1       |        "message" => "ip_address 123.30.238.16",
+logstash_1       |           "type" => "testFilter",
+logstash_1       |           "tags" => []
+logstash_1       | }
+```
+
+直接在 stdout 也是可以看出不少資訊如 city_name, timezone, country_name, region_name ... 但在 kibana 上畫成圖更棒！
+
+{% img /images/ithome/day6-2.png "day6-2.png" %}
+
+繪圖製表等技巧之後再另外為大家介紹囉{% img /images/ithome/emoticon39.gif "emoticon39.gif" %}
+
+
+

@@ -1,0 +1,37 @@
+---
+layout: post
+title: "30Days ELK - Day10 Kibana"
+date: 2016-12-25 21:09:52 +0800
+comments: true
+categories: 
+---
+
+Day10 - Kibana
+===
+
+Ola~讓我們開心的使用圖形化介面吧。
+終於講到可以讓我們把資料以 html 顯示的方式囉，kibana 也就是 E.L.K 裡的 Ｋ將由 logstash 過濾完並儲存到 elasticsearch 的資料透過設定 index 進行索引。今天就先讓我們來檢視一下介面上有哪些區塊及其所屬的功能。
+
+{% img /images/ithome/day10-1.png "day10-1.png" %}
+
+1. 主功能選單：kibana 的主功能列表包含了以下功能
+
+    - Discover : 用以檢視各索引下的記錄內容及總記錄筆數
+    - Visualize : 將搜尋出的數據以長條圖、圓餅圖、表格等方式呈現
+    - Dashboard : 將以儲存的搜尋結果或已完成的圖表組合成一份快速報表
+    - Timelion : 時序性的監看 query
+    - Dev Tools : 提供一個在 kibana 直接呼叫 elasticsearch 的方式
+    - Managment : 設定 kibana 對應的 elasticsearch index patterns，管理已經儲存好的搜尋結果物件、視覺化結果物件，及進階資料過濾設定
+2. Index : 要搜索的 index pattern
+3. Avaliable Fields : 搜索 index 下所包含的屬性(也就是我們在 logstash 切出來的部分)
+4. Timestamp : 資料時間，可用於特定時間區間資料量觀察
+5. source : 也就是我們先前所儲存的資料內容
+6. 搜尋條件 : 預設 ”*“ 搜尋 index 下所有紀錄  
+  
+
+
+一般來說我們首次使用流程為開啟 Managment 先做 index patterns create 的動作，在以 Discover 搜尋特定的條件或特定的時間區間資料，並且至 Visualize 以圖表的方式將我們想知道的資訊視覺化，最後以 Dashboard 組合顯示出所有我們想了解或觀察的資訊。
+
+至於 2~6 的內容其實便是 Discover 的主要的操作區塊，容許我明天在做進一步的解釋 {% img /images/ithome/emoticon31.gif "emoticon31.gif" %}
+
+

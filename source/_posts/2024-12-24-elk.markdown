@@ -1,0 +1,123 @@
+---
+layout: post
+title: "30Days ELK - Day9 Elasticsearch 狀態檢視"
+date: 2016-12-24 21:43:22 +0800
+comments: true
+categories: 
+---
+
+Day9 - Elasticsearch 狀態檢視
+===
+
+今天簡單介紹一下幾個觀察 elasticsearch 的指令與方法，讓我從個人最常用的index目錄說起。
+
+## Index 狀態
+
+```bash
+$ curl -XGET http://127.0.0.1:9200/_cat/indices?v
+```
+
+回傳結果
+
+{% img /images/ithome/day9-1.png "day9-1.png" %}
+
+這是我個人最常用來確認現在 elasticsearch 保存的 index 有哪些以及所佔的空間有多少的方式。
+
+- health : 代表資料點的健康狀態，red 表資料有缺損無法使用; yellow 表資料只有一份沒有 shard，若單一結點壞損無法進行回復; green 表資料有 shard 的備援若單點損壞依然可以正常運行檢索
+- status : 是否啟用
+- index : index 檢索名稱
+- uuid : 唯一識別 key
+- pri : 主要 shards 數量
+- rep : 副本 shards 數量
+- docs.count : index 下總紀錄筆數
+- docs.deleted : 資料被異動的次數
+- store.size : 儲存主要資料所佔用的空間
+- pri.store.size : 儲存副本所佔空間  
+
+*shards 是什麼？讓我們在講到叢集結點的時候解釋*
+
+上面用來檢索的方式其實是利用 elasticsearch 提供的 _cat API 來達成，由於先前回傳的各種結果都是由 json 格式所組成，即便加上了 pretty 參數來顯示若是資料稍微複雜時難免還是不易閱讀，_cat API 不但幫我們解決閱讀性問題也直接提供了許多實用的查詢。
+
+以下再補充幾個以後你可能會想知道的 API:
+
+## 線程狀態
+
+```bash
+$ curl -s -XGET http://127.0.0.1:9200/_cat/thread_pool?v
+```
+
+回傳結果
+
+```bash
+node_name name                active queue rejected
+TkPKm5U   bulk                     0     0        0
+TkPKm5U   fetch_shard_started      0     0        0
+TkPKm5U   fetch_shard_store        0     0        0
+TkPKm5U   flush                    0     0        0
+TkPKm5U   force_merge              0     0        0
+TkPKm5U   generic                  0     0        0
+TkPKm5U   get                      0     0        0
+TkPKm5U   index                    0     0        0
+TkPKm5U   listener                 0     0        0
+TkPKm5U   management               1     0        0
+TkPKm5U   refresh                  0     0        0
+TkPKm5U   search                   0     0        0
+TkPKm5U   snapshot                 0     0        0
+TkPKm5U   warmer                   0     0        0
+```
+
+## 叢集狀態
+
+```bash
+$ curl -XGET http://127.0.0.1:9200/_cat/health?v
+```
+
+回傳結果
+
+{% img /images/ithome/day9-2.png "day9-2.png" %}
+
+## 節點狀態
+
+```bash
+$ curl -XGET http://127.0.0.1:9200/_cat/nodes?v
+```
+
+回傳結果
+
+```bash
+ip    heap.percent ram.percent cpu load_1m load_5m load_15m node.role master name
+172.18.0.2    10      96   4    0.05    0.06     0.06 mdi       *      TkPKm5U
+```
+
+最後提醒大家我們可以透過參數 ?help 來幫助我們了解各個回傳結果欄位所代表的意義
+
+For example :
+
+```bash
+$ curl -s -XGET http://127.0.0.1:9200/_cat/thread_pool?help
+```
+
+Return :
+
+```bash
+node_name         | nn  | node name                                 
+node_id           | id  | persistent node id                        
+ephemeral_node_id | eid | ephemeral node id                         
+pid               | p   | process id                                
+host              | h   | host name                                 
+ip                | i   | ip address                                
+port              | po  | bound transport port                      
+name              | n   | thread pool name                          
+type              | t   | thread pool type                          
+active            | a   | number of active threads                  
+size              | s   | number of threads                         
+queue             | q   | number of tasks currently in queue        
+queue_size        | qs  | maximum number of tasks permitted in queue
+rejected          | r   | number of rejected tasks                  
+largest           | l   | highest number of seen active threads     
+completed         | c   | number of completed tasks                 
+min               | mi  | minimum number of threads                 
+max               | ma  | maximum number of threads                 
+keep_alive        | ka  | thread keep alive time
+```
+

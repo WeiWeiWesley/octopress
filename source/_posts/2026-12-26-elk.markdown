@@ -1,0 +1,62 @@
+---
+layout: post
+title: "30Days ELK - Day11 Discover data freely by any shape anytime"
+date: 2016-12-26 13:50:19 +0800
+comments: true
+categories: 
+---
+
+Day11 - Discover data freely by any shape anytime
+===
+
+首先我們先抓一份測試用的 apache log 協助我們有相同的資料可以做解說。
+
+[請於此下載](http://www.monitorware.com/en/logsamples/apache.php)
+
+將下載的 apache access_log 送至E.L.K
+
+```bash
+$ nc 127.0.0.1 5000 < ~/Downloads/apache-samples/access_log/access_log
+```
+
+首次使用 kibana 時需設定 index pattern ，因此讓我們點選左側主功能列表的 [Managment](http://127.0.0.1:5601/app/kibana#/management/kibana/index)。
+
+{% img /images/ithome/day11-1.png "day11-1.png" %}
+
+直接使用預設的 index pattern "logstash-*" 就好拉，讓我們按下 Create 來產生我們第一組 index pattern。
+
+
+{% img /images/ithome/day11-2.png "day11-2.png" %}
+
+
+這時候我們再進來看 Index Patterns 的內容應該會如上圖。
+
+再讓我們回到 [Discover](http://127.0.0.1:5601/app/kibana#/discover) 我們可以發現資料已經被成功的讀取出來囉。
+
+{% img /images/ithome/day11-3.png "day11-3.png" %}
+
+利用左側 Available Fields 列表將想呈現出的資訊進行添加，只需按 add 即可，如此一來便可以只針對想要關注的屬性內容進行顯示囉，如下圖:
+
+{% img /images/ithome/day11-4.png "day11-4.png" %}
+
+若我們只想獲得特定 apache 存取的紀錄我們可以利用最上方 search 欄位給與條件。
+
+- 搜索所有與"/images"目錄下有關的存取紀錄
+
+    {% img /images/ithome/day11-5.png "day11-5.png" %}
+
+    *特殊符號可加上反斜線""協助過濾*
+
+- 搜索所有與"/images"目錄下有關且日期為"2004:03:35:57"的紀錄
+
+    {% img /images/ithome/day11-6.png "day11-6.png" %}
+
+    *加上""以搜尋完整字串*
+    
+    *加上邏輯運算子可以協助我們目標範圍縮小*
+
+最後按下右上方 Save 儲存搜尋的條件，下次僅需按 Open 來開啟儲存好的條件，便可減少搜尋相同內容時間。
+
+{% img /images/ithome/day11-7.png "day11-7.png" %}
+
+你可能會想問：為何最左側的 Time 欄位只能是上傳 log 的時間，而非實際上 log 內容被記錄的時間呢？其實這是可以被修改的，明天讓我們調整一下 logstash.conf 的內容來協助改善資料呈現的方式。

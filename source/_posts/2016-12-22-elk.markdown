@@ -6,8 +6,6 @@ comments: true
 categories: 
 ---
 
-Day7 - Elasticsearch
-===
 
 Elasticsearch 是我們之後再 kibana 之所以可以快速的呼叫與搜尋的關鍵，我們來簡單暸解一下 elasticsearch 的特性與他在 E.L.K 中扮演的角色。
 

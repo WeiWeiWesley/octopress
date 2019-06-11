@@ -1,0 +1,138 @@
+---
+layout: post
+title: "30Days ELK - Day15 DataTable"
+date: 2016-12-30 18:23:53 +0800
+comments: true
+categories: 
+---
+
+好了我來還債了，我們繼續來看看 kibana visualize 還有什麼可以提供的。
+
+## DataTable
+
+Data table 可以用表格的方式提供我們比較多個屬性的方式，並依據我們設定的過濾順序來顯示資料，值得一提的是在新版的 kibana 介面可以直接用拖拉的方式改變排序的順序。接下來我們來試著以 data table 觀察 error log 的 level 與 host ip 間的關係，你可以參考以下設定配置啟動你的 docker logstash。
+
+- docker-compose.yml
+
+```yml
+version: '2'
+  services:
+    elasticsearch:
+      build: elasticsearch/
+      ports:
+        - "9200:9200"
+        - "9300:9300"
+      environment:
+        ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+      networks:
+        - docker_elk
+    logstash:
+      build: logstash/
+      command: -f /etc/logstash/conf.d/
+      volumes:
+        - ./logstash/config:/etc/logstash/conf.d
+      ports:
+        - "5000:5000"
+        - "5001:5001"
+      networks:
+        - docker_elk
+      depends_on:
+        - elasticsearch
+    kibana:
+      build: kibana/
+      volumes:
+        - ./kibana/config/:/etc/kibana/
+      ports:
+        - "5601:5601"
+      networks:
+        - docker_elk
+      depends_on:
+        - elasticsearch
+
+  networks:
+    docker_elk:
+      driver: bridge
+```
+
+- logstash.conf
+
+```toml
+  input {
+        tcp {
+                port => 5000
+                type => "access"
+        }
+
+        tcp {
+                port => 5001
+                type => "error"
+        }
+}
+
+filter {
+        if [type] == "access" {
+                grok {
+                        match => [
+                                "message", "%{HOSTNAME:ip_host} - - \[%{HTTPDATE:logDate}\] \"%{WORD:method} (?:%{URIPATHPARAM:url}|%{DATA:url}) HTTP/%{NUMBER:httpversion}\" %{WORD:response} (?:%{NUMBER:bytes}|-)"
+                        ]
+                }
+
+                date {
+                        match => ["logDate","dd/MMM/yyyy:HH:mm:ss Z"]
+                }
+        }
+
+        if [type] == "error" {
+                grok {
+                        match => [
+                                "message", "\[%{DAY:day} %{MONTH:month}  %{INT:date} %{TIME:time} %{YEAR:year}\] (?:\[%{LOGLEVEL:level}\]|-) (?:\[client %{IP:ip_host}\]|-) (?:\(%{INT:error_code}\)|-)%{GREEDYDATA:content}",
+                                "message", "\[%{DAY:day} %{MONTH:month}  %{INT:date} %{TIME:time} %{YEAR:year}\] (?:\[%{LOGLEVEL:level}\]|-) (?:\[client %{IP:ip_host}\]|-) %{GREEDYDATA:content}",
+                                "message", "\[%{DAY:day} %{MONTH:month}  %{INT:date} %{TIME:time} %{YEAR:year}\] (?:\[%{LOGLEVEL:level}\]|-) %{GREEDYDATA:content}",
+                                "message", "\[%{DAY:day} %{MONTH:month}  %{INT:date} %{TIME:time} %{YEAR:year}\] %{GREEDYDATA:content}"
+                        ]
+                        add_field => {
+                                "logDate" => "%{date} %{month} %{year} %{time}"
+                        }
+                        remove_field => [ "day", "month", "date", "time", "year" ]
+                }
+
+                date {
+                        match => ["logDate","dd MMM yyyy HH:mm:ss"]
+                }
+        }
+}
+
+output {
+
+        stdout { codec => rubydebug }
+
+        if "_grokparsefailure" not in [tags] {
+                elasticsearch {
+                                hosts => "elasticsearch:9200"
+                }
+        }
+}
+```
+
+簡單講解一下 logstash 的內容，docker-compose.yml 增加 logstash 監聽的 port 5001，並在 logstash.conf input 的部分加入以 port 5001 接收 error log 的接口。雖然你看到 filter 的設定看似複雜，其實他僅是依據我們接收到兩種不同性質的 log type 進行不同過濾而已，至於實際 grok 過濾的方式你可以善用 [grokdebug](https://grokdebug.herokuapp.com/) 多作嘗試。
+
+資料切割完成我們便可以快速地來產生表格囉
+
+1. 計算總數  
+{% img /images/ithome/day15-1.png "day15-1.png" %}
+
+2. 加入我們要觀察的屬性 level  
+{% img /images/ithome/day15-2.png "day15-2.png" %}
+
+3. 在依據 level 增加過濾條件 ip_host  
+{% img /images/ithome/day15-3.png "day15-3.png" %}
+
+4. 完成  
+{% img /images/ithome/day15-4.png "day15-4.png" %}
+
+若是你僅想簡單的呈現 level 的計數你可以忽略步驟3.，或你已經完成至步驟4.時你可以按下 Disable aggregation 來暫時取消聚合。
+
+{% img /images/ithome/day15-5.png "day15-5.png" %}
+
+{% img /images/ithome/day15-6.png "day15-6.png" %}
+

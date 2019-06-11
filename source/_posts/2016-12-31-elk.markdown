@@ -1,0 +1,42 @@
+---
+layout: post
+title: "30Days ELK - Day16 Visualize data with pie chart. Count by metric"
+date: 2016-12-31 19:00:27 +0800
+comments: true
+categories: 
+---
+
+另個常見的視覺化方式“圓餅圖 pie chart”，圓餅圖可以很有效地對資料進行展示。特別是在想要表示某個大扇型區在整體中所占比例，這一方法十分有效。設置流程與其他圖表大同小異，讓我們快速的一步驟一步驟完成他吧。若用範例資料進行練習，資料切割配置可參考Day15於此不重複說明囉。
+
+## Pie Chart
+
+1. 設定切割方式 slice:Count  
+{% img /images/ithome/day16-1.png "day16-1.png" %}
+
+2. 第一個聚合方式 Aggregation:terms by field:type，即以 log type 做分類  
+{% img /images/ithome/day16-2.png "day16-2.png" %}
+
+3. 第二層條件設定 Aggregation:terms by field:ip_host，即多加入 ip_host 為子條件  
+{% img /images/ithome/day16-3.png "day16-3.png" %}
+
+4. 圓餅圖完成  
+{% img /images/ithome/day16-4.png "day16-4.png" %}
+
+5. 美化成 donut chart，於 option 中勾選 Donut  
+{% img /images/ithome/day16-5.png "day16-5.png" %}
+
+{% img /images/ithome/day16-6.png "day16-6.png" %}
+
+## Metric
+
+Metric 適合用來做單一屬性計數，像是點擊次數、錯誤次數、連線次數...，之後可置於 dashboard 可一眼直接看出特定屬性的累積次數或平均值。
+
+- Count all
+
+{% img /images/ithome/day16-7.png "day16-7.png" %}
+
+- Count by type
+
+{% img /images/ithome/day16-8.png "day16-8.png" %}
+
+{% img /images/ithome/day16-9.png "day16-9.png" %}

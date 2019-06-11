@@ -5,8 +5,6 @@ date: 2016-12-17 14:52:07 +0800
 comments: true
 categories: 
 ---
-Day2 - 來個快速安裝吧
-===
 
 ## 安裝部屬 :
 

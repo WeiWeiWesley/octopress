@@ -1,0 +1,64 @@
+---
+layout: post
+title: "30Days ELK - Day13 Visualize data with line chart & bubble chart"
+date: 2016-12-28 21:29:57 +0800
+comments: true
+categories: 
+---
+
+今天要來畫畫圖兒，如果想完全照著做的話請使用下方 logstash.conf 檔配置，資料來源一樣使用[apache sample logs](http://www.monitorware.com/en/logsamples/apache.php)。
+
+logstash.conf
+```toml
+input {
+        tcp {
+                port => 5000
+                type => "testFilter"
+        }
+}
+
+filter {
+        grok {
+                match => [
+                                "message", "%{HOSTNAME:ip_host} - - \[%{HTTPDATE:logDate}\] \"%{WORD:method} (?:%{URIPATHPARAM:url}|%{DATA:url}) HTTP/%{NUMBER:httpversion}\" %{WORD:response} (?:%{NUMBER:bytes}|-)"
+                ]
+        }
+
+        date {
+                match => ["logDate","dd/MMM/yyyy:HH:mm:ss Z"]
+        }
+
+}
+
+output {
+
+        stdout { codec => rubydebug }
+
+        elasticsearch {
+                        hosts => "elasticsearch:9200"
+        }
+}
+```
+
+## Line chart
+
+讓我們來繪製個 http response 時序狀態圖，首先要設置的部分是 y軸，使用預設 "Count" 即可。  
+{% img /images/ithome/day13-1.png "day13-1.png" %}
+
+接著是 x軸的設定，請選擇 Aggregation : Data Histogram 的方式進行聚合，Field, Intervel 保值預設就好。  
+{% img /images/ithome/day13-2.png "day13-2.png" %}
+
+按下 ▶ 後可以看到 x軸產生出 count、y軸產生出 timestamp時間軸，這樣就完成了摺線圖的框架。目前裡面顯示的線圖還不是我們需要的資訊，目前顯示的只是這段時間內所有紀錄所產生的 "存取量/時間" 圖而已。  
+{% img /images/ithome/day13-3.png "day13-3.png" %}  
+
+讓我們把我們想知道的 http response 資料加進聚合條件，按下 Add sub-buckets 選擇 Split Lines。  
+{% img /images/ithome/day13-4.png "day13-4.png" %}  
+
+設定 Sub Aggregation : Terms 並選擇我們想要的屬性 Field : response.keyword。其實往後如果你在 logstash filter 有切分出各種屬性，且帶有固定可識別的內容的話 Terms 是你在繪製圖表的好幫手。以這次來說他直接依據 response 出現的內容幫我們分出了 200, 404, 301 等狀態。到這裡算成功的讓我們的 response 依據時間與狀態在線圖上表現出來囉。  
+{% img /images/ithome/day13-5.png "day13-5.png" %}
+
+## 泡泡圖 bubble chart
+
+另外跟大家分享一下氣泡圖的產生方式其實超簡單，剛剛的設置都不變，只在左上方 Option 取消勾選 Show Connecting Lines，並且按下 Add mertics 於 y軸設置增加 Dot Size 即可。如此一來點的大小就會隨著次數改變，使我們輕易看出顯著改變的地方。  
+{% img /images/ithome/day13-6.png "day13-6.png" %}
+

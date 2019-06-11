@@ -6,9 +6,6 @@ comments: true
 categories: 
 ---
 
-Day9 - Elasticsearch 狀態檢視
-===
-
 今天簡單介紹一下幾個觀察 elasticsearch 的指令與方法，讓我從個人最常用的index目錄說起。
 
 ## Index 狀態

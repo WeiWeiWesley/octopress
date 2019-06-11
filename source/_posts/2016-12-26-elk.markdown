@@ -6,8 +6,6 @@ comments: true
 categories: 
 ---
 
-Day11 - Discover data freely by any shape anytime
-===
 
 首先我們先抓一份測試用的 apache log 協助我們有相同的資料可以做解說。
 

@@ -1,0 +1,56 @@
+---
+layout: post
+title: "30Days ELK - Day12 Reformate timestamp"
+date: 2016-12-27 21:50:44 +0800
+comments: true
+categories: 
+---
+
+
+延續先前 Discover 的部分，如何讓我們的紀錄時間 match 上 log 的紀錄時間呢?
+
+我們的目標是讓 timestamp 可以符合 log date，要做到這種效果我們只能在資料送至 elasticsearch 儲存前完成，也就是說我們在 logstash 便可以先開始我們的時戳替換工作囉。
+
+先來看一下若完成了有什麼效果
+{% img /images/ithome/day12-1.png "day12-1.png" %}
+
+從圖中我們可以清楚地看出每日有少筆記錄，若把日期拉常可以看出長期的趨勢，而把時間縮小至小時則可以看出短時間系統負載狀況。
+
+```bash
+$ vim ~/docker-elk/logstash/config/logstash.conf
+```
+
+```toml
+input {
+        tcp {
+                port => 5000
+                type => apacheLog
+        }
+}
+
+filter {
+        grok {
+                match => ["message", "%{HTTPDATE:logdate}"]
+        }
+        date {
+                match => ["logdate", "dd/MMM/yyyy:HH:mm:ss Z"]
+        }
+}
+
+output {
+        elasticsearch {
+                hosts => "elasticsearch:9200"
+        }
+}
+```
+
+logstash.conf 先用 grok filter 將 "logdate" 過濾出來 "HTTPDATE" 是我們在 apache log 所使用的 Syslog dates pattern，再將取得的 "logdate" 以 date filter 替換掉我們現在的 timestamp。
+
+*注意 "Z" 是 time zone*  
+*更多 grok pattern* : https://github.com/elastic/logstash/blob/v1.4.2/patterns/grok-patterns
+
+現在我們可以輕鬆地調整時間範圍 hourly, daily, weekly 來觀察資料囉
+{% img /images/ithome/day12-2.png "day12-2.png" %}
+
+當然還是要記得在右上角選擇日期範圍喔，以這次的 sample log 來說範圍可以這樣選擇
+{% img /images/ithome/day12-3.png "day12-3.png" %}

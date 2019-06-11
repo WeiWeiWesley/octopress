@@ -1,0 +1,27 @@
+---
+layout: post
+title: "30Days ELK - Day14 Visualize data with area chart. Markdown your document."
+date: 2016-12-29 22:42:13 +0800
+comments: true
+categories: 
+---
+
+Area chart 基本繪製與 line chart 無異  
+
+1. 設定 y軸  
+{% img /images/ithome/day14-1.png "day14-1.png" %}
+2. 設定 x軸  
+{% img /images/ithome/day14-2.png "day14-2.png" %}
+3. 聚合加入欲比較的 field 屬性  
+{% img /images/ithome/day14-3.png "day14-3.png" %}
+4. 設定 Options 內容，使曲線變平滑且具有重疊透明度  
+{% img /images/ithome/day14-4.png "day14-4.png" %}
+5. 完成
+{% img /images/ithome/day14-5.png "day14-5.png" %}
+
+## Markdown
+
+使用上與我們在 ithome 鐵人發文上一樣喔，左邊為編輯欄，右邊預覽則是按下 ▶ 後顯示。  
+{% img /images/ithome/day14-6.png "day14-6.png" %}
+
+[Markdown 教學](http://markdown.tw/)

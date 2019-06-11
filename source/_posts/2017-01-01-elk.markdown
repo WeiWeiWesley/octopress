@@ -1,0 +1,58 @@
+---
+layout: post
+title: "30Days ELK - Day17 Bar chart. Tag Cloud. Tile map"
+date: 2017-01-01 23:34:12 +0800
+comments: true
+categories: 
+---
+
+我們今天來把 kiban visualize 的部分收個尾，首先介紹的是最常用到的 bar chart，設置的方式與 line chart, area chart 相同都是現設定好 x軸、y軸，再加入想要聚合的屬性。
+
+## Bar chart
+
+1. 設定 x軸為Count  
+{% img /images/ithome/day17-1.png "day17-1.png" %}
+
+2. 設定 y軸為 http version  
+{% img /images/ithome/day17-2.png "day17-2.png" %}
+
+3. 完成 http version 點擊次數比較圖  
+{% img /images/ithome/day17-3.png "day17-3.png" %}
+
+4. 增加子條件 ip_host 進行聚合  
+{% img /images/ithome/day17-4.png "day17-4.png" %}
+
+5. 完成不同 http version 下各 ip 來源數  
+{% img /images/ithome/day17-5.png "day17-5.png" %}
+
+6. 不以堆疊方式顯示改以柱狀圖群組表示，請更換 Option 中 Bar mode 為 grouped
+{% img /images/ithome/day17-6.png "day17-6.png" %}  
+<br>
+
+## Tag cloud
+
+普遍使用在論壇與個人部落格的標籤雲 Tag cloud 也可以用在 kibana 上喔，若是你的資料來源包含了使用者的操作資訊或瀏覽紀錄，這將是你快速觀察出目前最熱門的關鍵字或討論類別的方式。
+
+設置簡易，僅有 terms 聚合可選擇，因此只需選擇聚合下想關注的屬性即可
+{% img /images/ithome/day17-7.png "day17-7.png" %}
+<br>
+
+
+## Tile map
+
+Tile map 可用於觀察使用者來源地區，藉以觀察出潛在市場或需增加 CDN 以提升用戶體驗的區域。而在繪製前需對我們的資料做一下前處理，我們須在 logstash.conf 的 filter 中利用 geoip plugin。
+
+你需要將你過濾出來的 ip 位址加到 source 裡
+
+```toml
+filter {
+    ...
+
+    geoip {
+        source => "ip_host"
+    }
+}
+```
+
+若你的 geoip filter plugin 運作正常的話你到 kiban 僅需按下預覽即可直接產生出 tile map 囉！
+{% img /images/ithome/day17-8.png "day17-8.png" %}

@@ -6,8 +6,6 @@ comments: true
 categories: 
 ---
 
-Day6 - 便利的 logstsh plugin (filter - 2)
-===
 
 今天繼續來看一下有什麼實用的 filter plugins 可以協助我們把資訊從原始資料切割出來。
 

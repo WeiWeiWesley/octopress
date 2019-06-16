@@ -1,10 +1,10 @@
 ---
 layout: default
 navbar: Blog
-location: index
 ---
+
 <div class="row">
-  <div class="page-content">
+  <div class="page-content {% unless site.default_asides == empty and site.blog_index_asides == empty %}col-md-9{% else %}col-md-12{% endunless %}">
     <div class="blog-index" itemscope itemtype="http://schema.org/Blog">
     <meta itemprop="name" content="{{site.title}}" />
     {% if site.description %}<meta itemprop="description" content="{{site.description}}" />{% endif %}
@@ -32,4 +32,14 @@ location: index
       {% endif %}
     </ul>
   </div>
+
+  {% unless site.default_asides == empty and site.blog_index_asides == empty %}
+    <aside class="sidebar col-md-3">
+      {% if site.blog_index_asides.size %}
+        {% include_array blog_index_asides %}
+      {% else %}
+        {% include_array default_asides %}
+      {% endif %}
+    </aside>
+  {% endunless %}
 </div>

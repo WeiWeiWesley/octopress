@@ -3,11 +3,12 @@ layout: post
 title: "30Days ELK - Day11 Discover data freely by any shape anytime"
 date: 2016-12-26 13:50:19 +0800
 comments: true
-categories: 
+categories: ELK
 ---
 
 
 首先我們先抓一份測試用的 apache log 協助我們有相同的資料可以做解說。
+<!--more-->
 
 [請於此下載](http://www.monitorware.com/en/logsamples/apache.php)
 

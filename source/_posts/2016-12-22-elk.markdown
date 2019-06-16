@@ -3,11 +3,12 @@ layout: post
 title: "30Days ELK - Day7 Elasticsearch"
 date: 2016-12-22 19:50:02 +0800
 comments: true
-categories: 
+categories: ELK
 ---
 
 
 Elasticsearch 是我們之後再 kibana 之所以可以快速的呼叫與搜尋的關鍵，我們來簡單暸解一下 elasticsearch 的特性與他在 E.L.K 中扮演的角色。
+<!--more-->
 
 ## Elasticsearch
 - 分散式叢集架構

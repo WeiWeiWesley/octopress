@@ -1,0 +1,208 @@
+---
+layout: post
+title: "30Days ELK - Day22 Multi logstash machines used for monitoring."
+date: 2017-01-06 17:30:01 +0800
+comments: true
+categories: ELK
+---
+
+今天介紹的是一個利用虛擬機使用 logstash 的技巧，當我們有一台較高效能實體機器且有多個不同的資料來源時，我們可能會把 logstash.conf 用 file 檔名或 tcp port 來進行區別如：
+```toml
+input {
+        tcp {
+                port => 5000
+                type => "access"
+        }
+
+        tcp {
+                port => 5001
+                type => "error"
+        }
+}
+```
+<!--more-->
+<br>
+
+但當你兩個資料來源同時在進行輸入時你將無法區分個別來源的資源使用率，且每次於 filter 都需增加對不同資料來源所設定的判斷過濾如：
+```toml
+filter {
+        if [type] == "access" {
+                grok {}
+        }
+        
+        if [type] == "error" {
+                grok {}
+        }
+}
+```
+<br>
+
+這時既然我們是在 docker 上運行 logstash，何不直接新開一個 docker container for logstash 呢?你需要的只是稍微改變一下啟動時的 .yml，變且將原本的 logstash.conf 切分給個別來源使用，調整過後的配置如下:
+<br>
+
+docker-compose.yml
+```yml
+version: '2'
+
+services:
+  elasticsearch:
+    build: elasticsearch/
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    command: elasticsearch -E node.name="es1" -E cluster.name="mycluster" -E discovery.zen.ping.unicast.hosts="127.0.0.1"
+    environment:
+      ES_JAVA_OPTS: "-Xms500m -Xmx500m"
+    networks:
+      - docker_elk
+
+  elasticsearch2:
+    build: elasticsearch/
+    ports:
+      - "9202:9202"
+      - "9303:9303"
+    command: elasticsearch -E node.name="es2" -E cluster.name="mycluster" -E discovery.zen.ping.unicast.hosts="127.0.0.1"
+    environment:
+      ES_JAVA_OPTS: "-Xms500m -Xmx500m"
+    networks:
+      - docker_elk
+
+  logstash:
+    build: logstash/
+    container_name: access_logstash
+    command: -f /etc/logstash/conf.d/access.conf -w 8
+    volumes:
+      - ./logstash/config/:/etc/logstash/conf.d
+    ports:
+      - "5000:5000"
+    networks:
+      - docker_elk
+    depends_on:
+      - elasticsearch
+  logstash2:
+    build: logstash/
+    container_name: error_logstash
+    command: -f /etc/logstash/conf.d/error.conf -w 8
+    volumes:
+      - ./logstash/config/:/etc/logstash/conf.d
+    ports:
+      - "5001:5001"
+    networks:
+      - docker_elk
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    build: kibana/
+    volumes:
+      - ./kibana/config/:/opt/kibana/config/
+    ports:
+      - "5601:5601"
+    networks:
+      - docker_elk
+    depends_on:
+      - elasticsearch
+
+networks:
+  docker_elk:
+    driver: bridge
+```
+<br>
+
+access.conf
+```toml
+input {
+        tcp {
+                port => 5000
+                type => "access"
+        }
+
+}
+
+filter {
+                grok {  
+                        match => [
+                                "message", "%{HOSTNAME:ip_host} - - \[%{HTTPDATE:logDate}\] \"%{WORD:method} (?:%{URIPATHPARAM:url}|%{DATA:url}) HTTP/%{NUMBER:httpversion}\" %{WORD:response} (?:%{NUMBER:bytes}|-)"
+                        ]
+                }
+
+                date {  
+                        match => ["logDate","dd/MMM/yyyy:HH:mm:ss Z"]
+                }
+        }
+}
+
+output {
+
+        stdout { codec => rubydebug }
+
+        if "_grokparsefailure" not in [tags] {
+                elasticsearch {
+                                hosts => "elasticsearch:9200"
+                }
+        }
+}
+```
+<br>
+
+error.conf
+```toml
+input {
+        tcp {
+                port => 5001
+                type => "error"
+        }
+
+}
+
+filter {
+        grok {
+                        match => [
+                                "message", "\[%{DAY:day} %{MONTH:month}  %{INT:date} %{TIME:time} %{YEAR:year}\] (?:\[%{LOGLEVEL:level}\]|-) (?:\[client %{IP:ip_host}\]|-) (?:\(%{INT:error_code}\)|-)%{GREEDYDATA:content}",
+                                "message", "\[%{DAY:day} %{MONTH:month}  %{INT:date} %{TIME:time} %{YEAR:year}\] (?:\[%{LOGLEVEL:level}\]|-) (?:\[client %{IP:ip_host}\]|-) %{GREEDYDATA:content}",
+                                "message", "\[%{DAY:day} %{MONTH:month}  %{INT:date} %{TIME:time} %{YEAR:year}\] (?:\[%{LOGLEVEL:level}\]|-) %{GREEDYDATA:content}",
+                                "message", "\[%{DAY:day} %{MONTH:month}  %{INT:date} %{TIME:time} %{YEAR:year}\] %{GREEDYDATA:content}"
+                        ]
+
+                        add_field => {
+                                "logDate" => "%{date} %{month} %{year} %{time}"
+                        }
+
+                        remove_field => [ "day", "month", "date", "time", "year" ]
+        }
+
+                date {
+                        match => ["logDate","dd MMM yyyy HH:mm:ss"]
+                }
+}
+
+output {
+
+        stdout { codec => rubydebug }
+
+        if "_grokparsefailure" not in [tags] {
+                elasticsearch {
+                                hosts => "elasticsearch:9200"
+                }
+        }
+}
+```
+<br>
+
+這時候再來觀察已啟動的容器：
+{% img /images/ithome/day22-1.png "day22-1.png" %}
+
+利用服務名稱觀察資源使用狀態
+
+```bash
+$ sudo docker stats access_logstash error_logstash dockerelk_elasticsearch_1 dockerelk_elasticsearch2_1 dockerelk_kibana_1
+
+CONTAINER   CPU %   MEM USAGE / LIMIT   MEM %   NET I/O   BLOCK I/O  PIDS
+access_logstash 7.48% 396.6MiB / 1.951GiB 19.85% 3.6kB / 1.649kB 99.95MB / 0B 37
+error_logstash 6.67% 401.3MiB / 1.951GiB 20.09% 3.6kB / 1.649kB 101.3MB / 0B 37
+dockerelk_elasticsearch_1 0.40% 626MiB / 1.951GiB 31.33% 221.7kB / 1.259MB 134.4MB / 905.2kB 42
+dockerelk_elasticsearch2_1 0.31% 279.3MiB / 1.951GiB 13.98% 3.108kB / 648B 43.1MB / 118.8kB 30
+dockerelk_kibana_1 0.00% 72.52MiB / 1.951GiB 3.63% 1.258MB / 217.1kB 124.4MB / 4.096kB 11
+```
+
+如此一來便可以個別觀察輸入的狀況調整給予的資源分類囉，但你應需注意每開啟一個容器依然會有資源耗損，請依需求斟酌開啟的容器數量。

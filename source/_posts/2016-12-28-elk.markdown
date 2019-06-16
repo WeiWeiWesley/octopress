@@ -3,10 +3,11 @@ layout: post
 title: "30Days ELK - Day13 Visualize data with line chart & bubble chart"
 date: 2016-12-28 21:29:57 +0800
 comments: true
-categories: 
+categories: ELK
 ---
 
 今天要來畫畫圖兒，如果想完全照著做的話請使用下方 logstash.conf 檔配置，資料來源一樣使用[apache sample logs](http://www.monitorware.com/en/logsamples/apache.php)。
+<!--more-->
 
 logstash.conf
 ```toml

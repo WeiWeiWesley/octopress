@@ -3,10 +3,11 @@ layout: post
 title: "30Days ELK - Day9 Elasticsearch 狀態檢視"
 date: 2016-12-24 21:43:22 +0800
 comments: true
-categories: 
+categories: ELK
 ---
 
 今天簡單介紹一下幾個觀察 elasticsearch 的指令與方法，讓我從個人最常用的index目錄說起。
+<!--more-->
 
 ## Index 狀態
 

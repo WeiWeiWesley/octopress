@@ -1,0 +1,106 @@
+---
+layout: post
+title: "30Days ELK - Day21 Elasticsearch Cluster"
+date: 2017-01-05 23:49:30 +0800
+comments: true
+categories: ELK
+---
+
+我們進行到今天已經可以將 E.L.K 運行並實現資料分析、資料儲存、資料探索與視覺化，現在我們需要做的是提升它的可靠性與面對效能瓶頸時拓展自身的能力。這時候 elasticsearch cluster 就派上用場拉，至少要讓你的資料能夠有個備份，假設 docker container 毀損甚至機器毀損時能不受引響。
+<!--more-->
+<br>
+
+叢集式架構有個好處可以有多個 master 節點去做任務分配，預設上所有節點都能是 [Master-eligible node](https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-node.html#master-node) 也就是 master 候補，當你的 master node 壞掉的時候 eligible node 便會後補上來，達到容錯轉移的效果，所以你在設立叢集時可以考慮直接指定幾個有較多記憶體或性能較好的機器當 eligible node。
+
+同實體機 elasticsearch cluster 設置範例 docker-compose.yml
+```yml
+version: '2'
+
+services:
+  elasticsearch:
+    build: elasticsearch/
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    command: elasticsearch -E node.name="es1" -E cluster.name="mycluster" -E discovery.zen.ping.unicast.hosts="127.0.0.1"
+    environment:
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+    networks:
+      - docker_elk
+
+  elasticsearch2:
+    build: elasticsearch/
+    ports:
+      - "9202:9202"
+      - "9303:9303"
+    command: elasticsearch -E node.name="es2" -E cluster.name="mycluster" -E discovery.zen.ping.unicast.hosts="127.0.0.1"
+    environment:
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+    networks:
+      - docker_elk
+    depends_on:
+      - elasticsearch
+
+  logstash:
+    build: logstash/
+    container_name: main_logstash
+    command: -f /etc/logstash/conf.d/ -w 8
+    volumes:
+      - ./logstash/config:/etc/logstash/conf.d
+    ports:
+      - "5000:5000"
+      - "5001:5001"
+    networks:
+      - docker_elk
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    build: kibana/
+    volumes:
+      - ./kibana/config/:/opt/kibana/config/
+      - ./kibana/plugin/:/opt/kibana/plugin/
+    ports:
+      - "5601:5601"
+    networks:
+      - docker_elk
+    depends_on:
+      - elasticsearch
+
+networks:
+  docker_elk:
+    driver: bridge
+```
+
+你需要關注的地方只有 elasticsearch, elasticsearch2 這兩部分，原本我們的 docker-compose 就已經有 elasticsearch 的起用設置，再新增一個 service elasticsearch2 來做我們的容錯備份，使用的是與原本相同的 Dockerfile 當然也會用相同的 image。另一點不同的是在容器建立後指令操作 elasticsearch 進行 cluster 設定，也就是 command: ... 那行，設定了 cluster 的名稱、node 名稱、允許加入cluster的 host ip。
+<br>
+
+## 幾個常見的 cluster 設置參數 :
+
+- cluster.name: 叢集名稱
+- node.name: 節點名稱
+- node.master: 是否可為 master node
+- node.data: 是否可儲存資料
+- network.host: 綁定可用的 host ip
+- transport.tcp.port: 綁定 nodes 間傳遞使用的 port
+- http.port: 提供 http 服務的port
+- discovery.zen.ping.multicast.enabled: 是否允許自動加入叢集
+- discovery.zen.ping.unicast.hosts: 可自動加入 cluster 的 host
+- discovery.zen.minimum_master_nodes: 叢集最小 master nodes 需求
+
+#### 其中建議設置
+> discovery.zen.minimum_master_nodes = (all_nodes/n)+1
+>n = 網段數 or 機群數
+
+這樣的設置可以讓我們在部分節點間 offline 時以較多 nodes 的一邊運行服務，暫停不符合最小節點數的機群，確保不會產生資料不一致的問題。
+
+> Number of node.data ≧ (all_nodes/2)+1
+
+Cluster 預設儲存條件是 Number of node.data > (all_nodes/2)+1，這是為了保持資料證冗餘和最終一致性的方式，假設節點為3那至少要有2個節點有資料整個服務才能運行，可見 [Quorum](https://zh.wikipedia.org/wiki/Quorum_(%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F))。但這裡有個特例是當我們一開始只部屬兩個節點如本例，則 Number of node.data = 1，這樣可以完成最簡單的單點容錯轉移。
+
+#### 叢集狀態檢視
+```bash
+$ curl '127.0.0.1:9200/_cat/health?v'
+```
+
+{% img /images/ithome/day21-1.png "day21-1.png" %}

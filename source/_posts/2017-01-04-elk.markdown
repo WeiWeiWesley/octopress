@@ -1,0 +1,110 @@
+---
+layout: post
+title: "30Days ELK - Day20 Dockerfile & docker-compose"
+date: 2017-01-04 20:50:41 +0800
+comments: true
+categories: ELK
+---
+
+有了 docker 基本的概念後我們回頭看一下 docker 的設定檔 Dockerfile 與 docker-compose.yml，瞭解一下 logstash, elasticsearch, kibana 的虛擬機是怎麼被設定與啟用的。有了這些知識後能幫助我們解決一些 E.L.K 使用上或配置上的問題。
+<!--more-->
+<br>
+
+docker-compose.yml
+```yml
+version: '2'
+
+services:
+  elasticsearch:
+    build: elasticsearch/
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+    networks:
+      - docker_elk
+  logstash:
+    build: logstash/
+    command: -f /etc/logstash/conf.d/
+    volumes:
+      - ./logstash/config:/etc/logstash/conf.d
+    ports:
+      - "5000:5000"
+    networks:
+      - docker_elk
+    depends_on:
+      - elasticsearch
+  kibana:
+    build: kibana/
+    volumes:
+      - ./kibana/config/:/etc/kibana/
+    ports:
+      - "5601:5601"
+    networks:
+      - docker_elk
+    depends_on:
+      - elasticsearch
+
+networks:
+  docker_elk:
+    driver: bridge
+```
+<br>
+
+以上為我們 E.L.K 一開始最原始的配置，這邊逐項解說 .yml 指令
+
+- version: 版本號
+- services: 服務名稱
+- build: 取得 DockerFile 的位置，是建立 services container 的設定檔，須注意的地方是 dco root 的位置
+- ports: 虛擬機可使用的 ports
+- environment: 指定環境變數，可以看到服務 elasticsearch 設定了環境變數 ES_JAVA_OPTS: "-Xms1g -Xmx1g"，用來限制 JVM 可取用的記憶體上下限。elasticsearch 環境變數可參考 官方文件
+- command: container 建立後執行的指令
+- networks: 提供一個容器可互聯的獨立網路環境
+- depends_on: 建立相依關係，確保服務有序性的啟動，以本例來說所有的服務都須在 elasticsearch 建立後才能開始
+
+<br>
+
+當我們執行 docker-compose up 的時候便是以 docker-compose.yml 作為預設配置啟動，若是你須要指定特定 .yml 你可以使用
+```bash
+$ sudo docker-compose -f your-docker-compose.yml up
+```
+
+執行啟動後的 container 可以這樣觀察
+```bash
+$ sudo docker ps
+
+CONTAINER ID        IMAGE                     COMMAND                  CREATED             STATUS              PORTS                                            NAMES
+83eadc7420b1        dockerelk_logstash        "/docker-entrypoint.s"   3 days ago          Up 12 seconds       0.0.0.0:5000-5001->5000-5001/tcp                 dockerelk_logstash_1
+68482bc790f8        dockerelk_kibana          "/docker-entrypoint.s"   2 weeks ago         Up 12 seconds       0.0.0.0:5601->5601/tcp                           dockerelk_kibana_1
+0d3ce76d31cd        dockerelk_elasticsearch   "/docker-entrypoint.s"   2 weeks ago         Up 13 seconds       0.0.0.0:9200->9200/tcp, 0.0.0.0:9300->9300/tcp   dockerelk_elasticsearch_1
+```
+<br>
+
+最後我們來看一下
+- logstash/Dockerfile
+- elasticsearch/Dockerfile
+- kibana/Dockerfile
+
+這幾個 Dockerfile，其實這是啟動 E.L.K 的真正位置只是我們把它統一寫到 docker-compose.yml 的 build 指令去了，像是 build: kibana/ 即是以 kibana/Dockerfile 設定去建立 container，其中 FROM kibana:5 便是啟用的 image 名稱。因此在 docker-compose.yml services 內執行指令的順序一定是由 build 開始再去執行其他指令，若是有一定要先執行的部分，像是 image 的選擇或環境參數就可以直接先在 Dockerfile 設定好。講到這邊也算是對 E.L.K 怎們運行於 docker 上有個簡易的交代囉～
+
+logstash/Dockerfile
+```Dockerfile
+FROM logstash:5
+# Add your logstash plugins setup here
+# Example: RUN logstash-plugin install logstash-filter-json
+```
+
+elasticsearch/Dockerfile
+```Dockerfile
+FROM elasticsearch:5
+
+ENV ES_JAVA_OPTS="-Des.path.conf=/etc/elasticsearch"
+
+CMD ["-E", "network.host=0.0.0.0", "-E", "discovery.zen.minimum_master_nodes=1"]
+```
+
+kibana/Dockerfile
+```Dockerfile
+FROM kibana:5
+```

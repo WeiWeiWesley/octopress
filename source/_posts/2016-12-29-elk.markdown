@@ -3,10 +3,11 @@ layout: post
 title: "30Days ELK - Day14 Visualize data with area chart. Markdown your document."
 date: 2016-12-29 22:42:13 +0800
 comments: true
-categories: 
+categories: ELK
 ---
 
 Area chart 基本繪製與 line chart 無異  
+<!--more-->
 
 1. 設定 y軸  
 {% img /images/ithome/day14-1.png "day14-1.png" %}

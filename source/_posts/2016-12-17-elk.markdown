@@ -3,13 +3,14 @@ layout: post
 title: "30Days ELK - Day2 來個快速安裝吧"
 date: 2016-12-17 14:52:07 +0800
 comments: true
-categories: 
+categories: ELK
 ---
 
 ## 安裝部屬 :
 
 1. 安裝 docker
 https://joshhu.gitbooks.io/docker_theory_install/content/DockerBible/ubuntuvm.html
+<!--more-->
 
     >Docker支援絕大部分的Linux，只要該Linux的核心版本編號夠新。另外在Mac OS及Windows下則無法直接支援Docker，必須使用特殊方法，或是使用VM
 

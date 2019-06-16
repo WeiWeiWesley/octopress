@@ -3,10 +3,11 @@ layout: post
 title: "30Days ELK - Day15 DataTable"
 date: 2016-12-30 18:23:53 +0800
 comments: true
-categories: 
+categories: ELK
 ---
 
 好了我來還債了，我們繼續來看看 kibana visualize 還有什麼可以提供的。
+<!--more-->
 
 ## DataTable
 

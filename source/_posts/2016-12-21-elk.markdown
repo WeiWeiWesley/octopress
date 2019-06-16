@@ -3,11 +3,12 @@ layout: post
 title: "30Days ELK - Day6 便利的 logstsh plugin (filter - 2)"
 date: 2016-12-21 14:12:52 +0800
 comments: true
-categories: 
+categories: ELK
 ---
 
 
 今天繼續來看一下有什麼實用的 filter plugins 可以協助我們把資訊從原始資料切割出來。
+<!--more-->
 
 ## json
 

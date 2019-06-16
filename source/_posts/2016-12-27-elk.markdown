@@ -3,11 +3,12 @@ layout: post
 title: "30Days ELK - Day12 Reformate timestamp"
 date: 2016-12-27 21:50:44 +0800
 comments: true
-categories: 
+categories: ELK
 ---
 
 
 延續先前 Discover 的部分，如何讓我們的紀錄時間 match 上 log 的紀錄時間呢?
+<!--more-->
 
 我們的目標是讓 timestamp 可以符合 log date，要做到這種效果我們只能在資料送至 elasticsearch 儲存前完成，也就是說我們在 logstash 便可以先開始我們的時戳替換工作囉。
 

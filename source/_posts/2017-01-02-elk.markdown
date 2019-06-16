@@ -1,0 +1,34 @@
+---
+layout: post
+title: "30Days ELK - Day18 Dashboard"
+date: 2017-01-02 20:12:59 +0800
+comments: true
+categories: ELK
+---
+
+先前我們在 Visualize 繪製了許多圖表，這些圖表可能個別代表不同資訊內容或比較，當然我們有可能需要整合這些資訊到同一個頁面裡，這時侯 Dashboard 就登場拉～多個願望一次滿足。當然前提是你要在 Visualize 繪製儲存所需的圖表然後到 Dashboard 就可以直接加入囉。
+<!--more-->
+
+It will look like this.  
+{% img /images/ithome/day18-1.png "day18-1.png" %}
+
+1. 要加入圖表可以按右上方的 Add  
+{% img /images/ithome/day18-2.png "day18-2.png" %}
+
+2. 也可以在 Add 裡找到 Saved Search，這便是我們在 Discover 儲存的結果  
+{% img /images/ithome/day18-3.png "day18-3.png" %}
+
+3. 在 Add 圖表後你可以將鼠標移到圖表上，這時顯示出來的的格線是用來輔助我們拖拉的補助線，將鼠標至於圖表右上十字符號即可拖拉調整位置囉  
+{% img /images/ithome/day18-4.png "day18-4.png" %}
+
+4. 最後我的背景之所以是黑色是因為有勾選 Options dark theme 的關係喔  
+{% img /images/ithome/day18-5.png "day18-5.png" %}
+
+5. 完成後記得按 Save 儲存，裡面有個 Store time with dashboard 請依據你是否有需要觀測固定時間勾選  
+{% img /images/ithome/day18-6.png "day18-6.png" %}
+
+6. 若不勾選擇下次 Open 開啟時則預設 15分鐘內資料  
+{% img /images/ithome/day18-7.png "day18-7.png" %}
+
+7. 若有分享 Dashboard 的需求請按 Share，直接提供頁面 url 或是鑲嵌方式給對方，此外還提供貼心的短網址哦  
+{% img /images/ithome/day18-8.png "day18-8.png" %}

@@ -1,0 +1,131 @@
+---
+layout: post
+title: "30Days ELK - Day26 Apache log 測試範例懶人包"
+date: 2017-01-10 22:19:06 +0800
+comments: true
+categories: ELK
+---
+
+提醒沒看過前面的朋友想直接拿首先基本安裝還是要有，可參考 [Day2 - 來個快速安裝吧](- 來個快速安裝吧) 獲得基本環境部署，開啟 [Kibana local](http://127.0.0.1:5601/app/kibana) 確定服務能正確啟動。
+
+來囉快速咻咻咻完成它
+<!--more-->
+<br>  
+
+Step 1.  
+下載測試 log 與 apache_logstash.conf 等配置檔
+```bash
+$ mkdir apache
+$ cd apache
+$ wget https://raw.githubusercontent.com/elastic/examples/master/ElasticStack_apache/apache_logstash.conf
+$ wget https://raw.githubusercontent.com/elastic/examples/master/ElasticStack_apache/apache_template.json
+$ wget https://raw.githubusercontent.com/elastic/examples/master/ElasticStack_apache/apache_kibana.json
+$ wget https://raw.githubusercontent.com/elastic/examples/master/ElasticStack_apache/apache_logs
+```
+<br>  
+
+Step 2.
+
+- 改變原本 docker-compose.yml logstash 設定檔與掛載設定  
+- 調整 command: -f /etc/logstash/conf.d/apache_logstash.conf  
+- 調整 volumes: - ./apache:/etc/logstash/elastic.apache  
+
+```Dockerfile
+logstash:
+    build: logstash/
+    command: -f /etc/logstash/conf.d/apache_logstash.conf
+    volumes:
+      - ./logstash/config:/etc/logstash/conf.d
+      - ./apache:/etc/logstash/elastic.apache
+    ports:
+      - "5000:5000"
+    networks:
+      - docker_elk
+    depends_on:
+      - elasticsearch
+```
+<br>  
+
+Step 3.
+
+- 調整 apache_logstash.conf
+- 調整 input tcp
+- 調整 elasticsearch template => "/etc/logstash/elastic.apache/apache_template.json"
+
+```toml
+input {
+        tcp {
+                port => 5000
+        }
+}
+
+
+filter {
+  grok {
+    match => {
+      "message" => '%{IPORHOST:clientip} %{USER:ident} %{USER:auth} \[%{HTTPDATE:timestamp}\] "%{WORD:verb} %{DATA:request} HTTP/%{NUMBER:httpversion}" %{NUMBER:response:int} (?:-|%{NUMBER:bytes:int}) %{QS:referrer} %{QS:agent}'
+    }
+  }
+
+  date {
+    match => [ "timestamp", "dd/MMM/YYYY:HH:mm:ss Z" ]
+    locale => en
+  }
+
+  geoip {
+    source => "clientip"
+  }
+
+  useragent {
+    source => "agent"
+    target => "useragent"
+  }
+}
+
+output {
+  stdout {
+    codec => dots {}
+  }
+
+  elasticsearch {
+    hosts => "elasticsearch:9200"
+    index => "apache_elastic_example"
+    template => "/etc/logstash/elastic.apache/apache_template.json"
+    template_name => "apache_elastic_example"
+    template_overwrite => true
+  }
+}
+```
+<br>  
+
+Step 4.  
+重啟 docker container
+```bash
+$ sudo docker-compose stop
+$ sudo docker-compose up -d
+```
+
+Step 5.  
+Send log to logstash
+```bash
+$ nc localhost 5000 < ./apache/apache_logs
+```
+
+Step 6.
+
+- 匯入 [Dashboard](http://127.0.0.1:5601/app/kibana#/management/kibana/objects) 樣板
+- 依序 Management tab >> Saved Objects tab >> Import
+- 找到剛剛下載的 apache_kibana.json 匯入
+
+{% img /images/ithome/day26-1.png "day26-1.png" %}  
+<br>  
+
+Step 7.
+
+- Dashboard tab >> Open >> Sample Dashboard for Apache
+- Got it!
+
+{% img /images/ithome/day26-2.png "day26-2.png" %}  
+
+
+> [範例資料來源](https://github.com/elastic/examples/tree/master/ElasticStack_apache)

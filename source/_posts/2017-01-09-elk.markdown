@@ -1,0 +1,46 @@
+---
+layout: post
+title: "30Days ELK - Day25 Kibana X-Pack Graph"
+date: 2017-01-09 23:11:23 +0800
+comments: true
+categories: ELK
+---
+
+再開始講 Graph 之前我要跟大家提醒一下加裝 X-Pack 後你可能會遇到無法使用 tcp 當 input 的情況，然後一直跑去檢查 logstash container 的設定卻又苦無結果，其實這不是 logstash 壞掉哦!是 elasticsearch 上的 x-pack 因增加了權限管理而把 logstash 送過來的請求擋掉了，我們僅需簡單地在送至 elasticsearch 時帶上帳號密碼即可。
+<!--more-->
+<br>  
+
+Add user & password to logstash.conf
+```toml
+output {
+
+        stdout { codec => rubydebug }
+
+        if "_grokparsefailure" not in [tags] {
+                elasticsearch {
+                                user => "elastic"
+                                password => "changeme"
+                                hosts => "elasticsearch:9200"
+                }
+        }
+}
+```  
+
+
+## X-Pack Graph
+
+1. 打開 Graph 功能，並選擇欲探索的 index pattern
+{% img /images/ithome/day25-1.png "day25-1.png" %}  
+
+2. 增加欲產生網路圖的屬性，這邊以 apache access log 為例選擇了 url.keyword
+{% img /images/ithome/day25-2.png "day25-2.png" %}  
+
+3. 依序增加 response.keyword 與 bytes.keyword，並依想顯示的數量設定 Max terms per hop
+{% img /images/ithome/day25-3.png "day25-3.png" %}  
+
+4. 完成
+{% img /images/ithome/day25-4.png "day25-4.png" %}  
+
+<br>  
+
+觀察結果可以發現圖上部分線條較粗大，這表示兩個節點間互動的強度，在這邊來說便是資源取用的多寡，或特定大小檔案取用量。目前這個範例僅是協助我們了解 x-pack graph 的功能及其使用的方式，若是你想看到更有意義的網路圖的話，請另行使用真實資料模擬哦~

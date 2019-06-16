@@ -1,0 +1,89 @@
+---
+layout: post
+title: "30Days ELK - Day23 Kibana Plugin X-Pack Install"
+date: 2017-01-07 23:37:38 +0800
+comments: true
+categories: ELK
+---
+
+今天要介紹一個超好用的 kibana plugin，X-Pack。你一定要安裝的好用插件讓我們先裝在說。
+
+就讓我們照著[官網](https://www.elastic.co/downloads/x-pack)的六步驟來安裝吧(只是我們是裝在 docker 上)  
+<!--more-->  
+<br>  
+1. 於 elasticsearch 安裝 Ｘ-Pack  
+由於我們是安裝在 docker 上這邊我們需要先進入容器，方法請參考 [docker exec](https://docs.docker.com/engine/reference/commandline/exec/)  
+
+```bash
+$ sudo docker exec -ti elasticsearch bash
+
+$ cd /bin
+$ elasticsearch-plugin install x-pack
+
+-> Downloading x-pack from elastic
+[=================================================] 100%   
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@     WARNING: plugin requires additional permissions     @
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+* java.lang.RuntimePermission accessClassInPackage.com.sun.activation.registries
+* java.lang.RuntimePermission getClassLoader
+* java.lang.RuntimePermission setContextClassLoader
+* java.lang.RuntimePermission setFactory
+* java.security.SecurityPermission createPolicy.JavaPolicy
+* java.security.SecurityPermission getPolicy
+* java.security.SecurityPermission putProviderProperty.BC
+* java.security.SecurityPermission setPolicy
+* java.util.PropertyPermission * read,write
+* java.util.PropertyPermission sun.nio.ch.bugLevel write
+* javax.net.ssl.SSLPermission setHostnameVerifier
+See http://docs.oracle.com/javase/8/docs/technotes/guides/security/permissions.html
+for descriptions of what these permissions allow and the associated risks.
+
+Continue with installation? [y/N]y
+-> Installed x-pack
+```  
+2. 重啟 elasticsearch  
+這邊由於是使用 docker 虛擬機我們有 docker-cpmpose.yml，因此我們可以等 step 4. 在跟 kibana 一起重啟  
+<br>  
+3. 於 kibana 安裝 X-Pack  
+同 elasticsearch 的部分，進入容器後安裝  
+```bash
+$ sudo docker exec -ti dockerelk_kibana_1 bash
+
+$ cd /bin
+$ kibana-plugin install x-pack
+
+Attempting to transfer from x-pack
+Attempting to transfer from https://artifacts.elastic.co/downloads/kibana-plugins/x-pack/x-pack-5.1.1.zip
+Transferring 107852891 bytes....................
+Transfer complete
+Retrieving metadata from plugin archive
+Extracting plugin archive
+Extraction complete
+Optimizing and caching browser bundles...
+Plugin installation complete
+```
+<br>  
+4. 重啟 kibana 服務
+將 kibana 同 elasticsearch 一起重啟
+```bash
+sudo docker-compose up -d
+```
+<br>  
+5. 開起 kibana 頁面並以使用者：elastic 密碼：changeme 登入
+{% img /images/ithome/day23-1.png "day23-1.png" %}
+<br>  
+6. 完成安裝，開始探索 X-Pack 所提供的功能
+
+---
+
+#### 2017-02-08 補充 :
+若無法使用 Generated Reports
+請至容器安裝 libfontconfig 與 libfreetype6
+```bash
+$ sudo docker exec -ti dockerelk_kibana_1 bash
+
+apt-get update
+apt-get install libfontconfig
+apt-get install libfreetype6
+```

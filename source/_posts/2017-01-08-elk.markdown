@@ -1,0 +1,123 @@
+---
+layout: post
+title: "30Days ELK - Day24 Kinban Plugin X-Pack Monitoring"
+date: 2017-01-08 22:05:35 +0800
+comments: true
+categories: ELK
+---
+
+不好意思昨天出了意料之外的錯誤 (註：其實這篇應該昨天就要打出來的)，其實我也是一邊查資料一邊安裝 x-pack 這個 kibana plugin {% img /images/ithome/emoticon16.gif "emoticon16.gif" %}
+
+所以先前雖然裝好了 x-pack 也成功登入我們的 kibana web 介面，但最重要的就是這個 "but"，他完全沒有達到我本來想跟大家分享的功能，觀察 elasticsearch cluster nodes。其實僅是我在安裝的時候竟然！竟然！只在 elasticsearch 一個節點上未安裝 x-pack 
+
+這下真是尷尬今天會再重新分享一下更簡單的安裝方式，以及 X-Pack 提供的主要功能。想用昨天那種直接進入容器的方式安裝也可以，只是要記得所有的 elasticsearch nodes 都要裝哦～要是你覺得這樣太麻煩了這邊提供一個比較優雅的方式，也是一樣直接在啟動容器上改變設置：
+<!--more-->
+<br>  
+
+
+docker-compose.yml
+```yml
+version: '2'
+
+services:
+  elasticsearch:
+    build: elasticsearch/
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    command: elasticsearch -E node.name="es1" -E cluster.name="mycluster" -E discovery.zen.ping.unicast.hosts="YOUR IP HERE"
+    environment:
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+    networks:
+      - docker_elk
+  
+  elasticsearch2:
+    build: elasticsearch/
+    ports:
+      - "9202:9202"
+      - "9303:9303"
+    command: elasticsearch -E node.name="es2" -E cluster.name="mycluster" -E discovery.zen.ping.unicast.hosts="YOUR IP HERE"
+    environment:
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+    networks:
+      - docker_elk
+    depends_on:
+      - elasticsearch
+
+  logstash:
+    build: logstash/
+    container_name: main_logstash
+    command: -f /etc/logstash/conf.d/ -w 8
+    volumes:
+      - ./logstash/config:/etc/logstash/conf.d
+    ports:
+      - "5000:5000"
+      - "5001:5001"
+    networks:
+      - docker_elk
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    build: kibana/
+    volumes:
+      - ./kibana/config/:/opt/kibana/config/
+    ports:
+      - "5601:5601"
+    networks:
+      - docker_elk
+    depends_on:
+      - elasticsearch
+
+networks:
+  docker_elk:
+    driver: bridge
+```
+<br>  
+
+elasticsearch/Dockerfile
+```Dockerfile
+FROM elasticsearch:5
+
+ENV ES_JAVA_OPTS="-Des.path.conf=/etc/elasticsearch"
+#
+RUN elasticsearch-plugin install --batch x-pack
+
+CMD ["-E", "network.host=0.0.0.0", "-E", "discovery.zen.minimum_master_nodes=1"]
+```
+<br>  
+
+kibana/Dockerfile
+```Dockerfile
+FROM kibana:5
+
+RUN kibana-plugin install x-pack
+```
+<br>  
+
+重啟登入後就有 Monitoring 的選項囉  
+{% img /images/ithome/day24-1.png "day24-1.png" %}  
+<br>  
+
+Elasticsearch Nodes Status!
+{% img /images/ithome/day24-2.png "day24-2.png" %}  
+
+<br>  
+
+
+Elasticsearch Nodes Details
+{% img /images/ithome/day24-3.png "day24-3.png" %}
+
+{% img /images/ithome/day24-4.png "day24-4.png" %}  
+
+<br>  
+
+Indices. 現在不用另外下指令去觀察 elasticsearch 的 index 囉
+{% img /images/ithome/day24-5.png "day24-6.png" %}  
+
+<br>  
+
+最後是使用者管理的部分，包含帳號密碼與角色的設定
+{% img /images/ithome/day24-6.png "day24-6.png" %}
+
+{% img /images/ithome/day24-7.png "day24-7.png" %}

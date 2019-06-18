@@ -1,0 +1,137 @@
+---
+layout: post
+title: "30Days ELK - Day27 地震熱區資料視覺化測試範例"
+date: 2017-01-11 23:42:06 +0800
+comments: true
+categories: ELK
+---
+
+這篇其實使用的技巧與上篇差異不大，主要是提供一個資料讓大家可以快速做出 Dashboard 並調整成符合自己的需求。當然你也可以參照 logstash.conf 調整一下資料過濾的方式，之前一直沒有提到的 grok 小技巧是其實你可以利用 (?:ValueA | ValueB) 的方式給予 field 預設值。
+<!--more-->
+<br>
+
+## Install Steps
+
+### Step 1. 下載測試資料
+```bash
+$ mkdir demoData
+$ cd demoData
+
+$ wget https://raw.githubusercontent.com/elastic/examples/master/ElasticStack_earthquakes/ncedc-earthquakes-dataset.tar.gz
+$ wget https://raw.githubusercontent.com/elastic/examples/master/ElasticStack_earthquakes/ncedc-earthquakes-logstash.conf
+$ wget https://raw.githubusercontent.com/elastic/examples/master/ElasticStack_earthquakes/ncedc-earthquakes-template.json
+$ wget https://raw.githubusercontent.com/elastic/examples/master/ElasticStack_earthquakes/ncedc-earthquakes-dashboards.json
+```
+
+### Step 2. 解開壓縮檔 ncedc-earthquakes-dataset.tar.gz
+```bash
+$ tar zxvf ncedc-earthquakes-dataset.tar.gz
+
+blasts.txt
+earthquakes.txt
+```
+
+### Step 3. 編輯 docker-compose.yml
+```yml
+version: '2'
+
+services:
+  elasticsearch:
+    container_name: earthquake_elasticsearch
+    build: elasticsearch/
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+    networks:
+      - docker_elk
+  logstash:
+    container_name: earthquake_logstash
+    build: logstash/
+    command: -f /etc/logstash/conf.d/ncedc-earthquakes-logstash.conf
+    volumes:
+      - ./logstash/config:/etc/logstash/conf.d
+      - /home/sytnet/Documents/elastic_stack/demoData:/etc/logstash/demoData
+    ports:
+      - "5000:5000"
+    networks:
+      - docker_elk
+    depends_on:
+      - elasticsearch
+  kibana:
+    container_name: kibana_wesley
+    build: kibana/
+    volumes:
+      - ./kibana/config/:/etc/kibana/
+    ports:
+      - "5601:5601"
+    networks:
+      - docker_elk
+    depends_on:
+      - elasticsearch
+
+networks:
+  docker_elk:
+    driver: bridge
+```
+
+### Step 4. 編輯所需 .conf 內容
+```bash
+$ cp demoData/ncedc-earthquakes-logstash.conf logstash/config/ncedc-earthquakes-logstash.conf
+$ vim logstash/config/ncedc-earthquakes-logstash.conf
+```
+
+```toml
+input {
+        tcp {
+                port => 5000
+                type => "earthquake"
+        }
+}
+
+filter {
+        grok {
+                match => [
+                        "message","%{INT:year}/%{INT:month}/%{INT:date} %{TIME:time},(?:%{DATA:latitudei:float}|-),(?:%{DATA:longitude:float}|-),(?:%{DATA:depth:float}|-),(?:%{DATA:mag:float}|-),(?:%{WORD:magType}|-),(?:%{DATA:nat}|-),(?:%{DATA:gap:float}|-),(?:%{DATA:dmin:float}|-),(?:%{DATA:rms:float}|-),(?:%{WORD:source}|-),(?:%{WORD:event_id}|-)"
+                ]
+
+                add_field => {
+                        "logDate" => "%{year} %{month} %{date} %{time}"
+                }
+        }
+
+        date {
+                match => ["logDate", "yyyy MM dd HH:mm:ss.SSS"]
+                remove_field => ["timestamp"]
+        }
+
+        mutate {
+                remove_field => ["latitude", "longitude", "year", "month", "date"]
+        }
+}
+
+output {
+        stdout { codec => dots }
+        elasticsearch {
+                hosts => "elasticsearch:9200"
+                index => "ncedc-earthquakes"
+                template => "/etc/logstash/demoData/ncedc-earthquakes-template.json"
+                template_name => "ncedc-earthquakes"
+                template_overwrite => true
+        }
+}
+```
+
+### Step 5. 重啟服務
+```bash
+$ sudo docker-compose stop
+$ sudo docker-compose up -d
+```
+
+### Step 6. 匯入 Dashboard 樣板 ncedc-earthquakes-dashboards.json
+{% img /images/ithome/day27-1.png "day27-1.png" %}
+
+### Step 7. 完成
+{% img /images/ithome/day27-2.png "day27-2.png" %}
+

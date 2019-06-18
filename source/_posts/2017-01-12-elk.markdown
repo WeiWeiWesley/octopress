@@ -1,0 +1,150 @@
+---
+layout: post
+title: "30Days ELK - Day28 Kibana Extended Metric Plugin"
+date: 2017-01-12 23:42:06 +0800
+comments: true
+categories: ELK
+---
+
+終於快要結束了，其實寫到這裡已經超過我於本預計想分享的部分了，所以很多東西真的是現學現賣，這次也是分享一個小插件的安裝與使用方式，還希望大家不嫌棄囉。
+
+## Kibana Extended Metric Plugin
+
+這個插件十分簡易，這邊直接提供測試資料與設定檔供大家，下載試玩。
+<!--more-->
+
+### Install
+
+當然我們這次所有實作都是放在 docker 上運行，請使用下方測試檔案與設定檔(testFile, docker-compose.yml, logstash.conf)啟動容器，並注意這個插件需運行於 kibana 5.1.1 以上版本。
+```bash
+$ sudo docker-compose up -d
+$ sudo docker exec -ti kibana_wesley bash
+
+# 進入容器後
+# cd bin/
+# kibana-plugin install https://github.com/ommsolutions/kibana_ext_metrics_vis/releases/download/0.1.0/extended_metric_vis.zip
+# 離開容器
+# exit
+
+$ sudo docker-compose stop
+$ sudo docker-compose up
+```
+
+#### Simple testFile
+```text
+username : Adams,execuation_time : 20
+username : Baker,execuation_time : 5
+username : Clark,execuation_time : 30
+username : Davis,execuation_time : 2
+username : Evans,execuation_time : 22
+username : Frank,execuation_time : 12
+username : Ghosh,execuation_time : 12
+username : Hills,execuation_time : 32
+username : Irwin,execuation_time : 21
+username : Jones,execuation_time : 21
+username : Klein,execuation_time : 21
+username : Lopez,execuation_time : 30
+username : Mason,execuation_time : 25
+username : Nalty,execuation_time : 24
+username : Ochoa,execuation_time : 23
+username : Patel,execuation_time : 54
+username : Quinn,execuation_time : 20
+username : Reily,execuation_time : 21
+username : Smith,execuation_time : 15
+username : Trott,execuation_time : 18
+username : Usman,execuation_time : 19
+username : Valdo,execuation_time : 20
+username : White,execuation_time : 23
+username : Xiang,execuation_time : 23
+username : Yakub,execuation_time : 28
+username : Zafar,execuation_time : 29
+username : Sneezy,execuation_time : 30
+username : Sleepy,execuation_time : 21
+username : Dopey,execuation_time : 5
+username : Doc,execuation_time : 27
+username : Happy,execuation_time : 26
+username : Bashful,execuation_time : 28
+username : Grumpy,execuation_time : 22
+username : Mufasa,execuation_time : 21
+username : Sarabi,execuation_time : 21
+username : Simba,execuation_time : 21
+username : Nala,execuation_time : 29
+username : Kiara,execuation_time : 30
+username : Kovu,execuation_time : 21
+username : Timon,execuation_time : 25
+username : Pumbaa,execuation_time : 26
+username : Rafiki,execuation_time : 28
+username : Shenzi,execuation_time : 29
+```
+
+#### docker-compose.yml
+```yml
+version: '2'
+
+services:
+  elasticsearch:
+    container_name: metric_es
+    build: elasticsearch/
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+    networks:
+      - docker_elk
+  logstash:
+    container_name: matric_lg
+    build: logstash/
+    command: -f /etc/logstash/conf.d/
+    volumes:
+      - ./logstash/config:/etc/logstash/conf.d
+    ports:
+      - "5000:5000"
+    networks:
+      - docker_elk
+    depends_on:
+      - elasticsearch
+  kibana:
+    container_name: kibana_wesley
+    build: kibana/
+    volumes:
+      - ./kibana/config/:/etc/kibana/
+    ports:
+      - "5601:5601"
+    networks:
+      - docker_elk
+    depends_on:
+      - elasticsearch
+
+networks:
+  docker_elk:
+    driver: bridge
+```
+
+#### logstash.conf
+```toml
+input {
+        tcp {
+                port => 5000
+        }
+}
+
+filter {
+        grok {
+                match => [
+                        "message","username : %{WORD:username},execuation_time : %{WORD:execuation_time}"
+                ]
+        }
+}
+
+output {
+        stdout { codec => rubydebug }
+        elasticsearch {
+                hosts => "elasticsearch:9200"
+        }
+}
+```
+
+> [資料來源](https://github.com/ommsolutions/kibana_ext_metrics_vis)
+
+{% img /images/ithome/day28-1.gif "day28-1.gif" %}

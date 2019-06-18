@@ -1,0 +1,36 @@
+---
+layout: post
+title: "30Days ELK - Day29 Optimization"
+date: 2017-01-13 20:34:56 +0800
+comments: true
+categories: ELK
+---
+
+在使用 Elastic Stack 的過程中可藉由調整 logstash 資料過濾的方式、elasticsearch 資料儲存的方式來優化整體效能。個人在使用的過程中有遇到效能上的問題，一開始是資源使用不完全，cup的使用率一直無法接近滿載的情況而導致資料處理緩慢。後來想到一個簡單的方式在不改動環境設定值的情況下增加 logstash 的工作量 —— 直接增加 logstash container，這是唯有我們在 docker container 下才有辦法做到的解法，雖然多虛擬機會犧牲部分資源，但能夠用這種方式使得資源被完全使用對當下的我來說是最重要的，如果你跟我一樣只是想多使用一點資源的話這或許是一個簡單不錯的方式。  
+
+*But if you want to do it by the right way. 你需要參考[官方文件](https://www.elastic.co/guide/en/logstash/current/logstash-settings-file.html)*  
+<!--more-->
+<br>  
+
+#### Logstash 效能相關參數
+
+- pipeline.workers
+- pipeline.output.workers
+- pipeline.batch.size
+- pipeline.batch.delay
+
+<br>  
+
+#### Logstash filter 效能檢驗流程
+
+Step 1: 簡易測試資料  
+Step 2: metrics 插件，觀察 documents/minute rate  
+Step 3: 優化 filtes  
+Step 4: 優化 inputs  
+Step 5: 優化 outputs  
+<br>  
+
+> [可參考官方調校建議](https://www.elastic.co/blog/logstash-configuration-tuning)
+
+實體資源相關
+> [Performance Troubleshooting Guide](https://www.elastic.co/guide/en/logstash/current/performance-troubleshooting.html)

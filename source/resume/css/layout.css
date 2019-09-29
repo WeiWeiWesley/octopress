@@ -346,7 +346,7 @@ ul#nav li.current a { color: #F06000; }
   	-webkit-animation: restful 2s ease;
 }
 .k8s {
-  	width: 50%;
+  	width: 30%;
   	-moz-animation: k8s 2s ease;
   	-webkit-animation: k8s 2s ease;
 }
@@ -354,6 +354,11 @@ ul#nav li.current a { color: #F06000; }
   	width: 80%;
   	-moz-animation: websocket 2s ease;
   	-webkit-animation: websocket 2s ease;
+}
+.docker {
+   width: 50%;
+   -moz-animation: docker 2s ease;
+   -webkit-animation: docker 2s ease;
 }
 
 @-moz-keyframes golang {
@@ -374,12 +379,16 @@ ul#nav li.current a { color: #F06000; }
 }
 @-moz-keyframes k8s {
   0%   { width: 0px;  }
-  100% { width: 50%;  }
+  100% { width: 30%;  }
 }
 @-moz-keyframes websocket {
   0%   { width: 0px;  }
   100% { width: 80%;  }
 }
+@-moz-keyframes docker {
+   0%   { width: 0px;  }
+   100% { width: 50%;  }
+ }
 
 @-webkit-keyframes golang {
   0%   { width: 0px;  }
@@ -399,12 +408,16 @@ ul#nav li.current a { color: #F06000; }
 }
 @-webkit-keyframes k8s {
   0%   { width: 0px;  }
-  100% { width: 50%;  }
+  100% { width: 30%;  }
 }
 @-webkit-keyframes websocket {
   0%   { width: 0px;  }
   100% { width: 80%;  }
 }
+@-webkit-keyframes docker {
+   0%   { width: 0px;  }
+   100% { width: 50%;  }
+ }
 
 /* ------------------------------------------------------------------ */
 /* e. Portfolio Section
@@ -526,12 +539,12 @@ ul#nav li.current a { color: #F06000; }
 }
 .popup-modal .description-box p {
 	font: 14px/24px 'opensans-regular', sans-serif;
-   color: #A1A1A1;
+   color: #666464;
    margin-bottom: 12px;
 }
 .popup-modal .description-box .categories {
    font: 11px/21px 'opensans-light', sans-serif;
-   color: #A1A1A1;
+   color: #666464;
    text-transform: uppercase;
    letter-spacing: 2px;
    display: block;
@@ -630,7 +643,7 @@ call-to-action .button {
    color: #0D0D0D;
 }
 #call-to-action p span {
-	font-family: 'opensans-semibold', sans-serif; 
+	font-family: 'opensans-semibold', sans-serif;
 	color: #D8D8D8;
 }
 
@@ -654,7 +667,7 @@ call-to-action .button {
    padding-bottom: 66px;
 }
 #testimonials h1 {
-   font: 18px/24px 'opensans-bold', sans-serif;   
+   font: 18px/24px 'opensans-bold', sans-serif;
    text-transform: uppercase;
    letter-spacing: 3px;
    color: #fff;

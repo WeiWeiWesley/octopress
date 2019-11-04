@@ -1,0 +1,136 @@
+---
+layout: post
+title: "DevOps 2019"
+date: 2019-11-04 15:44:14 +0800
+comments: true
+categories: DevOps
+---
+
+## Day1 Opens Space
+
+首次參加 Opens Space 這樣形式的交流方式，藉由成員各自發起議題自由且自發的進行討論，能收穫多少取決於參與的程度，不僅是聆聽者也是意見與問題的提供者，透過議題發起、討論、提問、回答來持續的找出可能性與盲點。
+
+其中參加了 “Waterfall 中的 Agile Scrum”、“到底是 DevOps 包含 Agile 還是 Agile 包含 DevOps”、“如何讓主管了解 DevOps 真正的理論好處” 這三個主題。三個主題的共通點是都有討論到如何去實踐 DevOps，DevOps 並非規範不是單一流程更非單一系統，更接近一個文化一個共同的價值交付的過程，但價值與文化的統一談何容易，故此狹義的 DevOps 可以讓我們從 CI/CD 做起，藉由統一持續驗證系統開發結果，減少人工手動的繁複程序加速交付流程，增加團隊信心，也同時直接增加商業利益。
+
+<!--more-->
+
+## Day2
+
+### 打開DevOps的后門：成為卓越的管理者 - 李智樺（Ruddy）
+- 對新進們來說，不需要end to end devops，只需要DEV+OPS
+- 團隊開發效能 = 技術 + 經驗 - 干擾
+- "察覺"是有才能的人與一般人的差別，工程師應該時常的尋求回饋，要能有察覺 awareness
+- 敏捷教練離開後會不會讓團隊敏捷度倒退，取決於主管
+- DevOps 重點是在心態 決定行為
+
+### 國泰金控數位轉型的驅動力 - Talking DevOps in Financial Industry - 廖士賓 （Anderson Liao）
+- ITIL and DevOps的結合，主要精神是持續改善
+- 重點放在事故管理與變更管理
+    - 有效管理變更來源
+    - 自動化機制導入變更流程
+    - 開發、建置、測試、部署皆有紀錄
+- Change Advisory Board (CAB)，每週會進行一次變更審查會議
+
+
+### 阿里巴巴基於 DevOps 平臺的研發效能提升與品質保障 - 黃博文（延枚）
+- 自動化發布工具(2009) -> 統一構建部署平台(2013)
+- 一些阿里巴巴自己的流程與成就
+
+### LINE SRE Practice from Observability Viewpoint
+- Observability 包含 testting & monitoring
+- tracing + metrics + logging
+- On call process
+    - record issue
+    - identify scope
+    - identify possible act
+    - decide what act to do
+    - take action
+    - report result
+
+### Proactive Continuous Monitoring - 吳菖育（ChangYu Wu）
+- Continuous Monitoring 產出應用程序，搭配持續監控的角度獲得性能視圖
+- 建議用時間序列來觀察log有無異常（標準差）
+    - 簡單平均法：預測突發流量
+    - 移動平均法：預測下個相同時間點會有相同流量
+    - Wave 的觀察: 波的最大值 最小值 上下斜率，去預測
+- 持續不斷驗證新版本是否按預期執行，最後放心地發佈新部署
+
+![](https://i.imgur.com/Q2dLhcu.png)
+
+
+### 從零開始的 DevOps - 吳剛志（Andrew Wu）
+- 架構團隊與基礎設施團隊會預先分析鋪建好提供給開發工程師
+- 流程優化先有順暢的手動才來談自動化
+- config as code
+- Core SDK provide
+
+## Day3
+
+### AppRunner：開源 PaaS 平台助力匯豐千人 DevOps 轉型 - Daniel Flower
+
+- 2014 24 releases, 受技術債所苦 -> 2018 12000 releases 已將基礎設施轉換為 code管理，團隊可以 focus在商業邏輯上
+- 認為監控不僅是正式環境需要，監控落無法落實於個環境便無用
+- 用工具自動化取代表格流程
+
+### 17Media SRE Journey - 林毅民（Sammy）
+- 五個關鍵信條
+    - Accept Failure as Normal：除罪化提供心理上的安全，發生問題時先修復而非找問題，事後檢討避免再度發生
+    - Reduce Organization Silos：用簡單通用的語言分享知識給不同團隊，讓大家都大致了解這一塊。時常 1on1 交流，不僅是主管對同事也可以是同事對同事
+    - Implement Gradual Change：緩慢但目標明確，例如 Nexflix 花了七年的時間搬上 cloud，17花費半年將 AWS to GCP
+    - Leverage Tooling & Automation：鼓勵內部團隊研發各種能增進自動化的小工具，並以套件的方式分享給大家，可以提供一個show off的機會增加信心，將來也可以當作履歷上的一個小作品
+    - Measure Everything：使用單一介面觀測所有狀態，所有！
+- Try to change your organization, or change your job
+
+### 七問：持續交付能力建設的靈魂拷問 - 景韵
+- 研發運營一體化能力成熟度模型
+    - 容器化
+    - 微服務
+    - 插件化
+    - 方便自動化測試
+    - 可伸縮(scaling)
+    - 可觀測性
+    - 組織結構-技術中台
+    - 工具
+
+### KKTIX 的 SRE 日常 - 李洵（Lee Xun）
+- Class SRE implements DevOps
+- RD, SRE 如何分工？程式邏輯以外的技術問題交給SRE
+- SRE 工作項目
+    - 優化工作流程
+    - 壓力測試
+    - 基礎建設重構
+    - 神秘事件trace
+- SRE 人員特質
+    - 重視核心知識(計算機組織，演算法)
+    - 重視細節，追根究底
+    - 重視團隊分享
+
+### 從零開始的 Configuration Management - 陳俊毅（Levi Chen）
+- why configuration management?
+    - Deploying to multiple envioronments
+    - Too many domain names
+    - High tenancies
+- how to configuration management?
+    - 前都希望是用 push 的一次 set 好服務起來，現在build 好 config 後放到 CM 等run service時再去pull config
+    - configuration hierarchy (逐層去取由最細部開始反向取回)
+- 對團隊做出貢獻，並對團隊的影響(impact)降到最小
+
+### 用 DevOps 手法推出使用者愈來喜歡的產品 - 曾建璋（Derek Tzeng）
+- Log Everything
+- 了解 customer segment: 使用者的獲益與痛苦
+- Value stream 價值產生的過程
+- 哪些因素阻礙我們持續、快速地讓產品為使用者提供價值？ Find it!
+- ![](https://i.imgur.com/lfjaJpA.png)
+- ![](https://i.imgur.com/BgJGqpg.png)
+
+## 應用
+
+藉由參加opens space的機會跟在 DevOps有經驗的先進們討論，工程師在引導工作流程包含自動化、監控、測試所獲得的成本資源是否往往低於期望。也趁機藉此得到一些實務問題的解答，本次即在 k8s 部署上獲得了不錯的關鍵資訊，可直接應用於 server to server 的 scaling 策略調整，使長連線伺服器在多伺服器環境下的重啟更為平順。
+
+回歸正題 DevOps 到底如何如何應用至工作上呢？先說結論，我們可以從CI/CD做起，從整合自動化測試與發布開始，藉由統一持續驗證系統開發結果，減少人工手動的繁複程序加速交付流程，增加團隊信心，也同時直接增加商業利益。這是從首日opens space 討論至個講者分享反覆提到 DevOps 基礎設施的部分，硬體軟體的整合較簡單，所以我們從簡單的部分開始落實，當我們能在基礎設施穩固後才來處理困難的部分，人與流程。
+
+最近整合log至單一介面ELK，並且記錄除了錯誤外的額外資訊便是部分份講者提到的 Log Everything or Measure Everything。但要讓資訊更有效的突顯出來，需要持續的對資料進行塞選，了解如何凸顯出特殊事件讓 Dashboard 可以直接顯現出真正的異常事件，以主動通知取代被動查詢是我們在監控這塊可以努力的目標。
+
+
+
+

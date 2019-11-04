@@ -345,6 +345,11 @@ ul#nav li.current a { color: #F06000; }
   	-moz-animation: restful 2s ease;
   	-webkit-animation: restful 2s ease;
 }
+.json-rpc {
+   width: 80%;
+   -moz-animation: json-rpc 2s ease;
+   -webkit-animation: json-rpc 2s ease;
+}
 .k8s {
   	width: 30%;
   	-moz-animation: k8s 2s ease;
@@ -377,6 +382,10 @@ ul#nav li.current a { color: #F06000; }
   0%   { width: 0px;  }
   100% { width: 80%;  }
 }
+@-moz-keyframes json-rpc {
+   0%   { width: 0px;  }
+   100% { width: 80%;  }
+ }
 @-moz-keyframes k8s {
   0%   { width: 0px;  }
   100% { width: 30%;  }
@@ -406,6 +415,10 @@ ul#nav li.current a { color: #F06000; }
   0%   { width: 0px;  }
   100% { width: 80%;  }
 }
+@-webkit-keyframes json-rpc {
+   0%   { width: 0px;  }
+   100% { width: 80%;  }
+ }
 @-webkit-keyframes k8s {
   0%   { width: 0px;  }
   100% { width: 30%;  }

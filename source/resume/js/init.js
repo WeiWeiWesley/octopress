@@ -146,33 +146,38 @@
       var contactSubject = $('#contactForm #contactSubject').val();
       var contactMessage = $('#contactForm #contactMessage').val();
 
-      var data = 'contactName=' + contactName + '&contactEmail=' + contactEmail +
-               '&contactSubject=' + contactSubject + '&contactMessage=' + contactMessage;
+      // var data = 'contactName=' + contactName + '&contactEmail=' + contactEmail +
+      //          '&contactSubject=' + contactSubject + '&contactMessage=' + contactMessage;
 
-      $.ajax({
 
-	      type: "POST",
-	      url: "inc/sendEmail.php",
-	      data: data,
-	      success: function(msg) {
+      var sendTo = 'mailto:wesleymailbox1@gmail.com?subject=' + contactSubject + '&body=' + contactMessage
 
-            // Message was sent
-            if (msg == 'OK') {
-               $('#image-loader').fadeOut();
-               $('#message-warning').hide();
-               $('#contactForm').fadeOut();
-               $('#message-success').fadeIn();   
-            }
-            // There was an error
-            else {
-               $('#image-loader').fadeOut();
-               $('#message-warning').html(msg);
-	            $('#message-warning').fadeIn();
-            }
+      window.open(sendTo);
 
-	      }
+      // $.ajax({
 
-      });
+	   //    type: "POST",
+	   //    url: "inc/sendEmail.php",
+	   //    data: data,
+	   //    success: function(msg) {
+
+      //       // Message was sent
+      //       if (msg == 'OK') {
+      //          $('#image-loader').fadeOut();
+      //          $('#message-warning').hide();
+      //          $('#contactForm').fadeOut();
+      //          $('#message-success').fadeIn();
+      //       }
+      //       // There was an error
+      //       else {
+      //          $('#image-loader').fadeOut();
+      //          $('#message-warning').html(msg);
+	   //          $('#message-warning').fadeIn();
+      //       }
+
+	   //    }
+
+      // });
       return false;
    });
 

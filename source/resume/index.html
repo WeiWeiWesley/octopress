@@ -215,7 +215,7 @@
                      - Scurm 開發流程導入參與 <br>
                      - 遊戲插件，建立 Server 對 Server 的 websocket連線且提供自動復原機制 <br>
                      - 運用 Gin套件開發遊戲平台後台 <br>
-                     - Rpc 微服務連線使用，Websocket遊戲推送核心優化 <br>
+                     - Rpc 微服務連線框架 <br>
                      - Websocket 併發壓測工具 <br>
                      - ELK 分散式log收集分析系統搭建及 k8s環境部署 <br>
                   </div>
@@ -242,14 +242,11 @@
 
                <div class="twelve columns">
 
-                  <h3>University of Life</h3>
-                  <p class="info">Master in Graphic Design <span>&bull;</span> <em class="date">April 2007</em></p>
+                  <h3>碩士生涯</h3>
+                  <p class="info">雲林科技大學資訊管理學所 <span>&bull;</span> <em class="date">April 2007</em></p>
 
                   <p>
-                  Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa.
-                  Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis,
-                  ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim.
-                  Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. Nullam dictum felis eu pede mollis pretium.
+
                   </p>
 
                </div>
@@ -260,14 +257,11 @@
 
                <div class="twelve columns">
 
-                  <h3>School of Cool Designers</h3>
-                  <p class="info">B.A. Degree in Graphic Design <span>&bull;</span> <em class="date">March 2003</em></p>
+                  <h3>大學生涯</h3>
+                  <p class="info">東海大學資訊管理學系 <span>&bull;</span> <em class="date">March 2003</em></p>
 
                   <p>
-                  This is Photoshop's version  of Lorem Ipsum. Proin gravida nibh vel velit auctor aliquet.
-                  Aenean sollicitudin, lorem quis bibendum auctor, nisi elit consequat ipsum, nec sagittis sem
-                  nibh id elit. Duis sed odio sit amet nibh vulputate cursus a sit amet mauris. Morbi accumsan
-                  ipsum velit. Nam nec tellus a odio tincidunt auctor a ornare odio. Sed non  mauris vitae erat
+                  
                   </p>
 
                </div>
@@ -312,22 +306,22 @@
                   </div>
           		</div> <!-- item end -->
 
-               <div class="columns portfolio-item">
+                <div class="columns portfolio-item">
                   <div class="item-wrap">
 
                      <a href="#modal-02" title="">
-                        <img alt="" src="../resume/images/portfolio/pressure_gauage.jpg">
+                        <img alt="" src="../resume/images/portfolio/mico.jpg">
                         <div class="overlay">
                            <div class="portfolio-item-meta">
-          					      <h5>WsTestTool</h5>
-                              <p>Test Tool</p>
+          					      <h5>RPC mico-service</h5>
+                              <p>RPC Server</p>
           					   </div>
                         </div>
                         <div class="link-icon"><i class="icon-plus"></i></div>
                      </a>
 
                   </div>
-          		</div> <!-- item end -->
+                </div> <!-- item end -->
 
                <div class="columns portfolio-item">
                   <div class="item-wrap">
@@ -397,15 +391,15 @@
                   </div>
           		</div> <!-- item end -->
 
-               <div class="columns portfolio-item">
+                <div class="columns portfolio-item">
                   <div class="item-wrap">
 
                      <a href="#modal-07" title="">
-                        <img alt="" src="../resume/images/portfolio/mico.jpg">
+                        <img alt="" src="../resume/images/portfolio/pressure_gauage.jpg">
                         <div class="overlay">
                            <div class="portfolio-item-meta">
-          					      <h5>RPC mico-service</h5>
-                              <p>RPC Server</p>
+          					      <h5>WsTestTool</h5>
+                              <p>Test Tool</p>
           					   </div>
                         </div>
                         <div class="link-icon"><i class="icon-plus"></i></div>
@@ -449,14 +443,14 @@
                   這是一個基於 Gin Web Framework 建立的 web server架構，提供簡易的 http 與 websocket 路由。可透過 docker 容器啟動，若有動態擴展與自動部署需求可參照 cloudbuild.yaml 進行部署。
                </p>
                <span class="categories">
-                  <i class="fa fa-tag"></i>Golang
+                  <i class="fa fa-tag"></i>Go
                   <i class="fa fa-tag"></i>docker
                   <i class="fa fa-tag"></i>websocket
                </span>
 		      </div>
 
             <div class="link-box">
-               <a href="https://github.com/WeiWeiWesley/webserver/tree/example">Github Repo</a>
+               <a href="https://github.com/WeiWeiWesley/webserver/tree/example" target="_blank">Github</a>
 		         <a class="popup-modal-dismiss">Close</a>
             </div>
 
@@ -464,25 +458,24 @@
 
          <div id="modal-02" class="popup-modal mfp-hide">
 
-		      <img class="scale-with-grid" src="../resume/images/portfolio/pressure_gauage.jpg" alt="" />
+		      <img class="scale-with-grid" src="../resume/images/portfolio/mico.jpg" alt="" />
 
 		      <div class="description-box">
-			      <h4>WsTestTool</h4>
-			      <p>這是一個以 go語言編寫的 websocket壓測工具，提供併發連線、結果驗證、時間計算等功能。筆者目前使用的環境多為 Linux & MacOS，如果想在CLI簡單地對 websocket服務進行壓力測試的話，這邊提供一個簡單的工具給大家</p>
+			      <h4>RPC mico-service</h4>
+			      <p>本套件提供以 json-rpc 協定連線的微服務框架，配合環境啟動變數可以容器形式運行多個不同的服務實體</p>
                <span class="categories">
-                  <i class="fa fa-tag"></i>Golang
-                  <i class="fa fa-tag"></i>websocket
-                  <i class="fa fa-tag"></i>test
-                  <i class="fa fa-tag"></i>concurrent
+                  <i class="fa fa-tag"></i>json-rpc
+                  <i class="fa fa-tag"></i>mico-service
+                  <i class="fa fa-tag"></i>go
                </span>
 		      </div>
 
             <div class="link-box">
-               <a href="https://github.com/WeiWeiWesley/WsTestTool">Github Repo</a>
+               <a href="https://github.com/WeiWeiWesley/rpc_server" target="_blank">Github</a>
 		         <a class="popup-modal-dismiss">Close</a>
             </div>
 
-	      </div><!-- modal-02 End -->
+         </div><!-- modal-02 End -->
 
          <div id="modal-03" class="popup-modal mfp-hide">
 
@@ -492,10 +485,10 @@
 			      <h4>Simple Storage</h4>
 			      <p>
                   分別以 redigo 與 gorm 建立簡易連線池，提供快速存取資料的方法而無需處理連線複用問題。
-                  使用範例可參考 <a href="https://github.com/WeiWeiWesley/webserver/tree/example">Instant Web Server</a>
+                  使用範例可參考 <a href="https://github.com/WeiWeiWesley/webserver/tree/example" target="_blank">Instant Web Server</a>
                </p>
                <span class="categories">
-                  <i class="fa fa-tag"></i>Golang
+                  <i class="fa fa-tag"></i>Go
                   <i class="fa fa-tag"></i>Mysql
                   <i class="fa fa-tag"></i>Redis
                   <i class="fa fa-tag"></i>Conn Pool
@@ -503,8 +496,8 @@
 		      </div>
 
             <div class="link-box">
-               <a href="https://github.com/WeiWeiWesley/simple_redis">Redis</a>
-               <a href="https://github.com/WeiWeiWesley/simple_orm">MySQL</a>
+               <a href="https://github.com/WeiWeiWesley/simple_redis" target="_blank">Redis</a>
+               <a href="https://github.com/WeiWeiWesley/simple_orm" target="_blank">MySQL</a>
                <a class="popup-modal-dismiss">Close</a>
             </div>
 
@@ -526,7 +519,7 @@
 		      </div>
 
             <div class="link-box">
-               <a href="https://weiweiwesley.github.io/">MyBlog</a>
+               <a href="https://weiweiwesley.github.io/" target="_blank">MyBlog</a>
 		         <a class="popup-modal-dismiss">Close</a>
             </div>
 
@@ -543,11 +536,12 @@
                      <i class="fa fa-tag"></i>Game
                      <i class="fa fa-tag"></i>Architecture
                      <i class="fa fa-tag"></i>Websocket
+                     <i class="fa fa-tag"></i>Go
                </span>
 		      </div>
 
             <div class="link-box">
-               <a href="https://hackmd.io/7OzKmJaWTvurwWShHKVkvg?view">Details</a>
+               <a href="https://hackmd.io/7OzKmJaWTvurwWShHKVkvg?view" target="_blank">Details</a>
 		         <a class="popup-modal-dismiss">Close</a>
             </div>
 
@@ -564,7 +558,7 @@
 		      </div>
 
             <div class="link-box">
-               <a href="https://github.com/WeiWeiWesley/ELK">Github Repo</a>
+               <a href="https://github.com/WeiWeiWesley/ELK" target="_blank">Github</a>
 		         <a class="popup-modal-dismiss">Close</a>
             </div>
 
@@ -572,19 +566,21 @@
 
          <div id="modal-07" class="popup-modal mfp-hide">
 
-		      <img class="scale-with-grid" src="../resume/images/portfolio/mico.jpg" alt="" />
+		      <img class="scale-with-grid" src="../resume/images/portfolio/pressure_gauage.jpg" alt="" />
 
 		      <div class="description-box">
-			      <h4>RPC mico-service</h4>
-			      <p>This package provide a customize json-rpc mico-service framework</p>
+			      <h4>WsTestTool</h4>
+			      <p>這是一個以 go語言編寫的 websocket壓測工具，提供併發連線、結果驗證、時間計算等功能。筆者目前使用的環境多為 Linux & MacOS，如果想在CLI簡單地對 websocket服務進行壓力測試的話，這邊提供一個簡單的工具給大家</p>
                <span class="categories">
-                  <i class="fa fa-tag"></i>json-rpc
-                  <i class="fa fa-tag"></i>mico-service
+                  <i class="fa fa-tag"></i>Go
+                  <i class="fa fa-tag"></i>websocket
+                  <i class="fa fa-tag"></i>test
+                  <i class="fa fa-tag"></i>concurrent
                </span>
 		      </div>
 
             <div class="link-box">
-               <a href="http://www.behance.net">Details</a>
+               <a href="https://github.com/WeiWeiWesley/WsTestTool" target="_blank">Github</a>
 		         <a class="popup-modal-dismiss">Close</a>
             </div>
 

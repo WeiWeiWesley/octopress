@@ -3,7 +3,7 @@ layout: post
 title: "Websocket 壓測工具"
 date: 2019-06-30 22:48:14 +0800
 comments: true
-categories: golang
+categories: golang test
 ---
 
 這是一個以 go語言編寫的 websocket壓測工具，提供併發連線、結果驗證、時間計算等功能。筆者目前使用的環境多為 Linux & MacOS，如果想在CLI簡單地對 websocket服務進行壓力測試的話，這邊提供一個簡單的工具給大家。

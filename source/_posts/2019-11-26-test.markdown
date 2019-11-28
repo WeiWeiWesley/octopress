@@ -1,0 +1,44 @@
+---
+layout: post
+title: "Private method 是否該進行單元測試？"
+date: 2019-11-26 15:09:00 +0800
+comments: true
+categories: test
+---
+
+__先講結論，不需要。__
+<!--more-->
+
+這可以從 OOP 的封裝特性進行推論。
+
+* public: 所有的 class 都可以存取
+* private: 只有在自己的 class 才可以存取
+<br><br>
+
+對使用者來說 private method 屬於無法直接接觸的使用的方法，使用者能使用的只有 class 暴露出來的 public method，
+而單元測試的目標在於模擬外部使用者，在使用類別所提供的方法時是否產生預期結果。由於外部無法直接存取 private method
+故直接對 private method 進行單元測試不符合封裝原則。
+<br><br>
+
+__Go Project實務__
+
+由於正在對舊專案進行補單元測試的工作，發現在一些專案裡的封裝或架構不是很好，導致你有需要對 private func() 進行單元測試，
+再有限時間內不被允許隨意調整結構的情況下，這邊建議可以另外寫一隻 test.go 目標 package 內，並且重新用新的 public func()
+封裝欲測試目標，如此一來便可以再不改變原有結構的提供一個可以測試的窗口。
+<br>
+
+```go
+
+func MyPrivateFuncTest(d Data) error {
+    return myPrivateFunc(d)
+}
+
+```
+
+<br>
+
+__Reference__
+[Should I test private methods or only public ones?](https://stackoverflow.com/questions/105007/should-i-test-private-methods-or-only-public-ones)
+
+
+
